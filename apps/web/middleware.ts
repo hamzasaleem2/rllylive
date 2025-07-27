@@ -4,9 +4,14 @@ import type { NextRequest } from "next/server"
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // For now, redirect root to signin (no auth check)
-  if (pathname === "/") {
-    return NextResponse.redirect(new URL("/signin", request.url))
+  // Redirect signin to root since we handle auth state in the main page
+  if (pathname === "/signin") {
+    return NextResponse.redirect(new URL("/", request.url))
+  }
+
+  // Redirect dashboard to root since we handle auth state in the main page  
+  if (pathname === "/dashboard") {
+    return NextResponse.redirect(new URL("/", request.url))
   }
 
   return NextResponse.next()

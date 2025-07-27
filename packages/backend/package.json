@@ -12,6 +12,11 @@
   "license": "ISC",
   "packageManager": "pnpm@10.4.1",
   "dependencies": {
+    "@convex-dev/better-auth": "^0.7.11",
+    "@workspace/auth": "workspace:*",
     "convex": "^1.25.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20"
   }
 }

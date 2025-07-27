@@ -1,0 +1,22 @@
+{
+  "name": "@workspace/auth",
+  "version": "1.0.0",
+  "description": "Shared authentication configuration",
+  "main": "index.js",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./auth.ts",
+      "default": "./auth.ts"
+    }
+  },
+  "dependencies": {
+    "@convex-dev/better-auth": "^0.7.11",
+    "better-auth": "1.2.12"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@workspace/typescript-config": "workspace:*",
+    "typescript": "^5.7.3"
+  }
+}
