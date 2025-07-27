@@ -12,7 +12,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@workspace/auth": "workspace:*",
     "@workspace/backend": "workspace:*",
     "@convex-dev/better-auth": "^0.7.11",
     "@workspace/ui": "workspace:*",

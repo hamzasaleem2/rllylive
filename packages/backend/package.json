@@ -2,7 +2,11 @@
   "name": "@workspace/backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "convex/email.js",
+  "type": "module",
+  "exports": {
+    "./convex/*": "./convex/*"
+  },
   "scripts": {
     "dev": "npx convex dev",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -13,10 +17,15 @@
   "packageManager": "pnpm@10.4.1",
   "dependencies": {
     "@convex-dev/better-auth": "^0.7.11",
-    "@workspace/auth": "workspace:*",
-    "convex": "^1.25.4"
+    "@convex-dev/resend": "^0.1.7",
+    "@react-email/components": "^0.3.2",
+    "@react-email/render": "^1.1.3",
+    "better-auth": "1.2.12",
+    "convex": "^1.25.4",
+    "react": "^19.0.0"
   },
   "devDependencies": {
-    "@types/node": "^20"
+    "@types/node": "^20",
+    "@types/react": "^19"
   }
 }
