@@ -2,7 +2,7 @@
 
 import { Authenticated, Unauthenticated, AuthLoading } from "convex/react"
 import { SignInForm } from "./signin/signin-form"
-import { Dashboard } from "./(authenticated)/dashboard/dashboard"
+import { RedirectToProfile } from "@/components/redirect-to-profile"
 import { Spinner } from "@workspace/ui/components/spinner"
 
 export default function Page() {
@@ -20,7 +20,7 @@ export default function Page() {
         <SignInForm />
       </Unauthenticated>
       <Authenticated>
-        <Dashboard />
+        <RedirectToProfile />
       </Authenticated>
     </>
   )

@@ -5,6 +5,7 @@ import {
   } from "@convex-dev/better-auth";
   import { api, components, internal } from "./_generated/api";
   import { query } from "./_generated/server";
+  import { v } from "convex/values";
   import type { Id, DataModel } from "./_generated/dataModel";
   
   // Typesafe way to pass Convex functions defined in this file
@@ -31,7 +32,29 @@ import {
     betterAuthComponent.createAuthFunctions<DataModel>({
       // Must create a user and return the user id
       onCreateUser: async (ctx, user) => {
-        return ctx.db.insert("users", {});
+        // Create the user record with Better Auth metadata
+        const userId = await ctx.db.insert("users", {
+          name: user.name,
+          image: user.image, 
+          email: user.email,
+        });
+        
+        // Generate rllyId by appending "rlly" to the _id
+        const rllyId = `rlly${userId}`;
+        
+        // Update the user record with the generated rllyId
+        await ctx.db.patch(userId, { rllyId });
+        
+        return userId;
+      },
+
+      // Update user when Better Auth user data changes
+      onUpdateUser: async (ctx, userId, user) => {
+        await ctx.db.patch(userId as Id<"users">, {
+          name: user.name,
+          image: user.image,
+          email: user.email,
+        });
       },
   
       // Delete the user when they are deleted from Better Auth
@@ -56,6 +79,32 @@ import {
       return {
         ...user,
         ...userMetadata,
+      };
+    },
+  });
+
+  // Get user by rllyId for public profiles
+  export const getUserByRllyId = query({
+    args: { rllyId: v.string() },
+    handler: async (ctx, { rllyId }) => {
+      const user = await ctx.db
+        .query("users")
+        .withIndex("by_rllyId", (q) => q.eq("rllyId", rllyId))
+        .first();
+      
+      if (!user) {
+        return null;
+      }
+
+      // Return public profile data including stored auth metadata
+      return {
+        _id: user._id,
+        username: user.username,
+        rllyId: user.rllyId,
+        _creationTime: user._creationTime,
+        name: user.name,
+        image: user.image,
+        email: user.email, // Consider if this should be public
       };
     },
   });

@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import {
   JetBrains_Mono,
   Instrument_Sans,
@@ -6,6 +7,34 @@ import {
 
 import "@workspace/ui/globals.css"
 import { Providers } from "@/components/providers"
+
+export const metadata: Metadata = {
+  title: {
+    template: "%s | rlly.live",
+    default: "rlly.live - Create events that actually happen"
+  },
+  description: "Create events that actually happen. Real-time RSVPs, live updates, and event management made simple.",
+  keywords: ["events", "RSVP", "party planning", "event management", "social"],
+  authors: [{ name: "rlly.live" }],
+  creator: "rlly.live",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://rlly.live",
+    siteName: "rlly.live",
+    title: "rlly.live - Create events that actually happen",
+    description: "Create events that actually happen. Real-time RSVPs, live updates, and event management made simple.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "rlly.live - Create events that actually happen",
+    description: "Create events that actually happen. Real-time RSVPs, live updates, and event management made simple.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+}
 
 // Monospace for logo and accents
 const jetbrainsMono = JetBrains_Mono({
