@@ -14,6 +14,7 @@ import type * as emails_components_BaseEmail from "../emails/components/BaseEmai
 import type * as emails_verifyOTP from "../emails/verifyOTP.js";
 import type * as http from "../http.js";
 import type * as lib_email from "../lib/email.js";
+import type * as users from "../users.js";
 
 import type {
   ApiFromModules,
@@ -36,6 +37,7 @@ declare const fullApi: ApiFromModules<{
   "emails/verifyOTP": typeof emails_verifyOTP;
   http: typeof http;
   "lib/email": typeof lib_email;
+  users: typeof users;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 

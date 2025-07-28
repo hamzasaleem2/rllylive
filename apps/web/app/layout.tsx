@@ -7,6 +7,7 @@ import {
 
 import "@workspace/ui/globals.css"
 import { Providers } from "@/components/providers"
+import { UnifiedHeader } from "@/components/unified-header"
 
 export const metadata: Metadata = {
   title: {
@@ -67,7 +68,10 @@ export default function RootLayout({
       <body
         className={`${instrumentSans.variable} ${jetbrainsMono.variable} ${bricolageGrotesque.variable} font-sans antialiased`}
       >
-        <Providers>{children}</Providers>
+        <Providers>
+          <UnifiedHeader />
+          {children}
+        </Providers>
       </body>
     </html>
   )

@@ -1,31 +1,45 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
-
-  // Redirect signin to root since we handle auth state in the main page
+  
+  // Check for session cookie (optimistic check for performance)
+  const sessionCookie = request.cookies.get('better-auth.session_token')
+  const isAuthenticated = !!sessionCookie
+  
+  // Home page logic
+  if (pathname === "/") {
+    if (isAuthenticated) {
+      // Let the page component handle profile redirect
+      return NextResponse.next()
+    } else {
+      // Redirect to signin
+      return NextResponse.redirect(new URL("/signin", request.url))
+    }
+  }
+  
+  // Signin page logic
   if (pathname === "/signin") {
-    return NextResponse.redirect(new URL("/", request.url))
+    if (isAuthenticated) {
+      // Redirect authenticated users away from signin
+      return NextResponse.redirect(new URL("/", request.url))
+    }
+    return NextResponse.next()
   }
-
-  // Redirect dashboard to root since we handle auth state in the main page  
-  if (pathname === "/dashboard") {
-    return NextResponse.redirect(new URL("/", request.url))
+  
+  // Protected routes (anything not signin or api)
+  if (!pathname.startsWith("/api") && pathname !== "/signin") {
+    if (!isAuthenticated) {
+      return NextResponse.redirect(new URL("/signin", request.url))
+    }
   }
-
+  
   return NextResponse.next()
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 }

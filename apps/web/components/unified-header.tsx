@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { Button } from "@workspace/ui/components/button"
 import { Logo } from "./logo"
 import { ThemeToggle } from "./theme-toggle"
+import { UserDropdown } from "./user-dropdown"
+import { Button } from "@workspace/ui/components/button"
+import { useAuthState } from "@/hooks/use-auth-state"
 
-export function Header() {
+function BaseHeader({ children }: { children: React.ReactNode }) {
   const [timeDisplay, setTimeDisplay] = useState("")
 
   useEffect(() => {
@@ -39,14 +41,35 @@ export function Header() {
               {timeDisplay}
             </div>
             <ThemeToggle />
-            <Button variant="dark" size="xs" className="cursor-pointer" asChild>
-              <Link href="/signin">
-                Sign In
-              </Link>
-            </Button>
+            {children}
           </div>
         </div>
       </div>
     </header>
+  )
+}
+
+export function UnifiedHeader() {
+  const { isAuthenticated } = useAuthState()
+  
+  // Don't render anything until we have an auth state (prevents flash)
+  if (isAuthenticated === null) {
+    return (
+      <BaseHeader>
+        <div className="w-[72px] h-[28px]" /> {/* Placeholder to prevent layout shift */}
+      </BaseHeader>
+    )
+  }
+  
+  return (
+    <BaseHeader>
+      {isAuthenticated ? (
+        <UserDropdown />
+      ) : (
+        <Button variant="dark" size="xs" className="cursor-pointer" asChild>
+          <Link href="/signin">Sign In</Link>
+        </Button>
+      )}
+    </BaseHeader>
   )
 }

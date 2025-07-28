@@ -49,13 +49,13 @@ import {
       },
 
       // Update user when Better Auth user data changes
-      onUpdateUser: async (ctx, userId, user) => {
-        await ctx.db.patch(userId as Id<"users">, {
-          name: user.name,
-          image: user.image,
-          email: user.email,
-        });
-      },
+      // onUpdateUser: async (ctx: any, userId: any, user: any) => {
+      //   await ctx.db.patch(userId as Id<"users">, {
+      //     name: user.name,
+      //     image: user.image,
+      //     email: user.email,
+      //   });
+      // },
   
       // Delete the user when they are deleted from Better Auth
       onDeleteUser: async (ctx, userId) => {

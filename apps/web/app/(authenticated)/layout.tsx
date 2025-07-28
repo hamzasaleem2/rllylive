@@ -10,9 +10,9 @@ export default function AuthenticatedLayout({
   children: React.ReactNode
 }) {
   return (
-    <>
-      {/* TODO: Add shared authenticated UI like navigation, sidebar, etc. */}
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
+      {/* Authenticated pages use the unified header from root layout */}
       {children}
-    </>
+    </div>
   )
 }

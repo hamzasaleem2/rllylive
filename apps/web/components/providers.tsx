@@ -5,6 +5,8 @@ import { ThemeProvider as NextThemesProvider } from "next-themes"
 import { ConvexReactClient } from "convex/react";
 import { authClient } from "@/lib/auth-client";
 import { ConvexBetterAuthProvider } from "@convex-dev/better-auth/react";
+import { ConvexQueryCacheProvider } from "convex-helpers/react/cache/provider";
+import { Toaster } from "@workspace/ui/components";
 
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
@@ -18,7 +20,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
       enableColorScheme
     >
       <ConvexBetterAuthProvider client={convex} authClient={authClient}>
-        {children}
+          <ConvexQueryCacheProvider>
+            {children}
+            <Toaster/>
+          </ConvexQueryCacheProvider>
       </ConvexBetterAuthProvider>
     </NextThemesProvider>
   )

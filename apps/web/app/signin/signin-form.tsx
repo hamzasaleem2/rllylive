@@ -1,13 +1,14 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@workspace/ui/components/button"
 import { Input } from "@workspace/ui/components/input"
 import { Spinner } from "@workspace/ui/components/spinner"
-import { Header } from "@/components/header"
 import { authClient } from "@/lib/auth-client"
 
 export function SignInForm() {
+  const router = useRouter()
   const [email, setEmail] = useState("")
   const [otp, setOtp] = useState(["", "", "", "", "", ""])
   const [step, setStep] = useState<"email" | "otp">("email")
@@ -148,6 +149,7 @@ export function SignInForm() {
           },
           onSuccess: () => {
             setIsLoading(false)
+            router.push("/")
           },
           onError: (ctx) => {
             setIsLoading(false)
@@ -227,6 +229,7 @@ export function SignInForm() {
       }, {
         onSuccess: () => {
           setGoogleLoading(false)
+          router.push("/")
         },
         onError: (ctx) => {
           setGoogleLoading(false)
@@ -241,7 +244,6 @@ export function SignInForm() {
 
   return (
     <main className="min-h-screen flex flex-col bg-gradient-to-br from-background via-muted/20 to-background">
-      <Header />
       
       <div className="flex-1 flex items-start justify-center px-6 pt-16 pb-12">
         <div className="w-full max-w-sm space-y-8 bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-8 shadow-lg">
