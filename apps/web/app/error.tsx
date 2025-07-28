@@ -43,7 +43,7 @@ export default function Error({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-3 pt-4">
+        <div className="flex flex-col gap-3 pt-4">
           <Button 
             onClick={reset}
             className="flex items-center gap-2"
@@ -55,7 +55,7 @@ export default function Error({
           <Button variant="outline" asChild className="flex items-center gap-2">
             <Link href="/">
               <Home className="h-4 w-4" />
-              Go Home
+              Go Back
             </Link>
           </Button>
         </div>

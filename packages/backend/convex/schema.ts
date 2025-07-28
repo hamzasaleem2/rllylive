@@ -15,4 +15,12 @@ export default defineSchema({
   })
   .index("by_username", ["username"])
   .index("by_rllyId", ["rllyId"]),
+
+  notificationPreferences: defineTable({
+    userId: v.id("users"),
+    category: v.string(),
+    channel: v.union(v.literal("email"), v.literal("off")),
+  })
+  .index("by_user", ["userId"])
+  .index("by_user_category", ["userId", "category"]),
 });

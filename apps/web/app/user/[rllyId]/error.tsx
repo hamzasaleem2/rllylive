@@ -37,7 +37,7 @@ export default function ProfileError({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-3 pt-4">
+        <div className="flex flex-col gap-3 pt-4">
           <Button 
             onClick={reset}
             className="flex items-center gap-2"

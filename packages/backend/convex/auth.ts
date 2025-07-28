@@ -45,6 +45,29 @@ import {
         // Update the user record with the generated rllyId
         await ctx.db.patch(userId, { rllyId });
         
+        // Create default notification preferences
+        const defaultNotificationCategories = [
+          "event_invitations",
+          "event_reminders", 
+          "event_blasts",
+          "event_updates",
+          "feedback_requests",
+          "guest_registrations",
+          "feedback_responses",
+          "new_members",
+          "event_submissions",
+          "product_updates"
+        ];
+        
+        // Insert all default notification preferences
+        for (const category of defaultNotificationCategories) {
+          await ctx.db.insert("notificationPreferences", {
+            userId: userId as any,
+            category,
+            channel: "email",
+          });
+        }
+        
         return userId;
       },
 
@@ -59,6 +82,17 @@ import {
   
       // Delete the user when they are deleted from Better Auth
       onDeleteUser: async (ctx, userId) => {
+        // Delete all notification preferences for this user
+        const preferences = await ctx.db
+          .query("notificationPreferences")
+          .withIndex("by_user", (q) => q.eq("userId", userId as any))
+          .collect();
+        
+        for (const preference of preferences) {
+          await ctx.db.delete(preference._id);
+        }
+        
+        // Delete the user record
         await ctx.db.delete(userId as Id<"users">);
       },
     });
