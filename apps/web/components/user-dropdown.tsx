@@ -43,7 +43,7 @@ export function UserDropdown() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="relative group">
+        <button className="relative group cursor-pointer">
           <div className="relative">
             <Avatar className="h-8 w-8 ring-2 ring-transparent group-hover:ring-live-green/30 transition-all duration-200 group-hover:scale-105">
               <AvatarImage 

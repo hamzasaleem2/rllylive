@@ -31,7 +31,7 @@ function validateWebsite(website: string | undefined): { valid: boolean; error?:
   if (website.length > 200) return { valid: false, error: "Website URL must be less than 200 characters" }
   // Basic URL validation
   try {
-    const url = new URL(website.startsWith('http') ? website : `https://${website}`)
+    const url = new URL(website)
     if (!['http:', 'https:'].includes(url.protocol)) {
       return { valid: false, error: "Website must be a valid HTTP or HTTPS URL" }
     }

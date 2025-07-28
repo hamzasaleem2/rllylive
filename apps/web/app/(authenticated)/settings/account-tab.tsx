@@ -102,7 +102,7 @@ export function AccountTab() {
       const cleanData = {
         ...formData,
         username: formData.username.replace(/^@/, "").trim(),
-        website: formData.website ? (formData.website.startsWith('http') ? formData.website : `https://${formData.website}`) : "",
+        website: formData.website.trim(),
         twitter: formData.twitter.replace(/^@/, "").trim(),
         instagram: formData.instagram.replace(/^@/, "").trim(),
       }
@@ -477,7 +477,7 @@ export function AccountTab() {
             <Input
               id="website"
               value={formData.website}
-              onChange={(e) => handleInputChange("website", e.target.value.replace(/^https?:\/\//, ""))}
+              onChange={(e) => handleInputChange("website", e.target.value)}
               placeholder="Your website"
               className="h-10"
               maxLength={200}
