@@ -6,24 +6,23 @@ import { AccountTab } from "./account-tab"
 
 export default function SettingsPage() {
   return (
-    <div className="flex-1 flex justify-center px-6 pt-16 pb-12">
+    <div className="flex-1 flex justify-center px-6 pt-0 pb-12">
       <div className="w-full max-w-4xl">
-        <div className="mb-8">
-          <h1 className="font-display text-3xl font-medium text-foreground mb-2">
-            Settings
-          </h1>
-        </div>
-
-        <Tabs defaultValue="account">
-          <TabsList>
-            <TabsTrigger value="account">Account</TabsTrigger>
-            <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          </TabsList>
-          
+        <Tabs defaultValue="account" className="mt-0">
+          <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+            <div className="pt-2 pb-1">
+              <h1 className="font-display text-3xl font-medium text-foreground mb-2">
+                Settings
+              </h1>
+            </div>
+            <TabsList>
+              <TabsTrigger value="account">Account</TabsTrigger>
+              <TabsTrigger value="notifications">Notifications</TabsTrigger>
+            </TabsList>
+          </div>
           <TabsContent value="account">
             <AccountTab />
           </TabsContent>
-          
           <TabsContent value="notifications" className="space-y-6">
             <Card>
               <CardHeader>
