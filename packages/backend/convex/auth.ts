@@ -4,7 +4,7 @@ import {
     type PublicAuthFunctions,
   } from "@convex-dev/better-auth";
   import { api, components, internal } from "./_generated/api";
-  import { query } from "./_generated/server";
+  import { query, mutation } from "./_generated/server";
   import { v } from "convex/values";
   import type { Id, DataModel } from "./_generated/dataModel";
   
@@ -94,7 +94,7 @@ import {
         
         // Delete the user record
         await ctx.db.delete(userId as Id<"users">);
-      },
+      }
     });
   
   // Example function for getting the current user
@@ -174,14 +174,19 @@ import {
 
   // Helper function to get the best profile identifier
   export const getProfileIdentifier = query({
-    args: { userId: v.id("users") },
+    args: { userId: v.string() },
     handler: async (ctx, { userId }) => {
-      const user = await ctx.db.get(userId);
-      if (!user) {
+      try {
+        const user = await ctx.db.get(userId as Id<"users">);
+        if (!user) {
+          return null;
+        }
+        
+        // Return username if available, otherwise rllyId
+        return user.username || user.rllyId;
+      } catch (error) {
+        // If there's an error (user doesn't exist yet), return null
         return null;
       }
-      
-      // Return username if available, otherwise rllyId
-      return user.username || user.rllyId;
     },
   });

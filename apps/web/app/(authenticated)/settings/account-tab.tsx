@@ -14,6 +14,7 @@ import { Upload, Save, Loader2, Instagram, Twitter, Youtube, Linkedin, Globe, Ch
 import { toast } from "sonner"
 import Image from "next/image"
 import { useDebounce } from "use-debounce"
+import { authClient } from "@/lib/auth-client"
 
 export function AccountTab() {
   const currentUser : any = useQuery(api.auth.getCurrentUser)
@@ -250,7 +251,7 @@ export function AccountTab() {
                 </div>
                 <div className="space-y-2">
                   <Skeleton className="h-4 w-8" />
-                  <Skeleton className="h-24 w-full" />
+                  <Skeleton className="h-24 w-80" />
                 </div>
               </div>
             </div>
@@ -293,7 +294,7 @@ export function AccountTab() {
         </div>
 
         {/* Emails Section Skeleton */}
-        <div>
+        <div className="border-t border-border/50 pt-8 mt-8">
           <Skeleton className="h-6 w-16 mb-4" />
           <div className="flex items-center gap-3">
             <Skeleton className="h-4 w-40" />
@@ -509,11 +510,11 @@ export function AccountTab() {
       </div>
 
       {/* Emails Section */}
-      <div>
+      <div className="border-t border-border/50 pt-8 mt-8">
         <h3 className="text-lg font-medium text-foreground mb-4">Emails</h3>
         <div className="flex items-center gap-3">
           <span className="text-sm text-muted-foreground">{currentUser.email}</span>
-          <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-200">
+          <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800 dark:bg-gray-500 dark:text-gray-200">
             Primary
           </span>
         </div>

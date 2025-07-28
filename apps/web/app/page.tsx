@@ -6,13 +6,14 @@ import { useQuery } from "convex/react"
 import { api } from "@workspace/backend/convex/_generated/api.js"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
+import { useMutation } from "convex/react"
 
 function AuthenticatedHome() {
   const router = useRouter()
   const currentUser = useQuery(api.auth.getCurrentUser)
-  const profileIdentifier = useQuery(api.auth.getProfileIdentifier, { 
-    userId: currentUser?._id as any 
-  })
+  const profileIdentifier = useQuery(api.auth.getProfileIdentifier, 
+    currentUser?._id ? { userId: currentUser._id as any } : "skip"
+  )
 
   useEffect(() => {
     if (profileIdentifier) {

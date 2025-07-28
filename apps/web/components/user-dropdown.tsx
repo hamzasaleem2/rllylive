@@ -20,9 +20,9 @@ import { User, Settings, LogOut } from "lucide-react"
 
 export function UserDropdown() {
   const currentUser = useQuery(api.auth.getCurrentUser)
-  const profileIdentifier = useQuery(api.auth.getProfileIdentifier, { 
-    userId: currentUser?._id as any 
-  })
+  const profileIdentifier = useQuery(api.auth.getProfileIdentifier, 
+    currentUser?._id ? { userId: currentUser._id as any } : "skip"
+  )
 
   if (!currentUser) return null
 
