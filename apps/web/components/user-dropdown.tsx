@@ -20,6 +20,9 @@ import { User, Settings, LogOut } from "lucide-react"
 
 export function UserDropdown() {
   const currentUser = useQuery(api.auth.getCurrentUser)
+  const profileIdentifier = useQuery(api.auth.getProfileIdentifier, { 
+    userId: currentUser?._id as any 
+  })
 
   if (!currentUser) return null
 
@@ -98,7 +101,7 @@ export function UserDropdown() {
         <div className="py-1">
           <DropdownMenuItem asChild>
             <Link 
-              href={`/user/${currentUser.rllyId}`}
+              href={`/user/${profileIdentifier || currentUser.rllyId}`}
               className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-accent/50 transition-colors"
             >
               <User className="h-4 w-4 text-muted-foreground" />
@@ -108,7 +111,7 @@ export function UserDropdown() {
           
           <DropdownMenuItem asChild>
             <Link 
-              href="/settings"
+              href="/settings/account"
               className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-accent/50 transition-colors"
             >
               <Settings className="h-4 w-4 text-muted-foreground" />

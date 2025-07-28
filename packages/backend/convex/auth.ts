@@ -110,9 +110,12 @@ import {
       // Get user data from your application's database
       // (skip this if you have no fields in your users table schema)
       const user = await ctx.db.get(userMetadata.userId as Id<"users">);
+      
+      // Prioritize database user data over Better Auth metadata
+      // This ensures updated fields like image are not overridden
       return {
-        ...user,
         ...userMetadata,
+        ...user, // Database data takes precedence
       };
     },
   });
@@ -140,5 +143,45 @@ import {
         image: user.image,
         email: user.email, // Consider if this should be public
       };
+    },
+  });
+
+  // Get user by username for public profiles
+  export const getUserByUsername = query({
+    args: { username: v.string() },
+    handler: async (ctx, { username }) => {
+      const user = await ctx.db
+        .query("users")
+        .withIndex("by_username", (q) => q.eq("username", username))
+        .first();
+      
+      if (!user) {
+        return null;
+      }
+
+      // Return public profile data including stored auth metadata
+      return {
+        _id: user._id,
+        username: user.username,
+        rllyId: user.rllyId,
+        _creationTime: user._creationTime,
+        name: user.name,
+        image: user.image,
+        email: user.email, // Consider if this should be public
+      };
+    },
+  });
+
+  // Helper function to get the best profile identifier
+  export const getProfileIdentifier = query({
+    args: { userId: v.id("users") },
+    handler: async (ctx, { userId }) => {
+      const user = await ctx.db.get(userId);
+      if (!user) {
+        return null;
+      }
+      
+      // Return username if available, otherwise rllyId
+      return user.username || user.rllyId;
     },
   });

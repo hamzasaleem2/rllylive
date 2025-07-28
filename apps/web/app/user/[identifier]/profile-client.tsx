@@ -1,26 +1,27 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useQuery } from "convex/react"
 import { api } from "@workspace/backend/convex/_generated/api.js"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { Skeleton } from "@workspace/ui/components/skeleton"
 import { Button } from "@workspace/ui/components/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar"
 import { Copy, Check } from "lucide-react"
 
 interface ProfileClientProps {
-  rllyId: string
+  identifier: string
 }
 
-function CopyLinkButton({ rllyId }: { rllyId?: string }) {
+function CopyLinkButton({ identifier }: { identifier?: string }) {
   const [copied, setCopied] = useState(false)
 
   const handleCopy = async () => {
-    if (!rllyId) return
+    if (!identifier) return
     
     try {
-      const url = `${window.location.origin}/user/${rllyId}`
+      const url = `${window.location.origin}/user/${identifier}`
       await navigator.clipboard.writeText(url)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
@@ -40,28 +41,49 @@ function CopyLinkButton({ rllyId }: { rllyId?: string }) {
       {copied ? (
         <>
           <Check className="h-4 w-4 text-live-green" />
-          <span className="ml-1 text-xs text-live-green">Copied!</span>
         </>
       ) : (
         <>
           <Copy className="h-4 w-4" />
-          <span className="ml-1 text-xs">Copy</span>
         </>
       )}
     </Button>
   )
 }
 
-export function ProfileClient({ rllyId }: ProfileClientProps) {
-  const user = useQuery(api.auth.getUserByRllyId, { rllyId })
+export function ProfileClient({ identifier }: ProfileClientProps) {
+  const router = useRouter()
+  
+  // Try to get user by username first, then by rllyId
+  const userByUsername = useQuery(api.auth.getUserByUsername, { username: identifier })
+  const userByRllyId = useQuery(api.auth.getUserByRllyId, { rllyId: identifier })
   const currentUser = useQuery(api.auth.getCurrentUser)
   
+  // Determine which user data to use
+  const user = userByUsername || userByRllyId
+  
   // Check authentication status
-  const isOwnProfile = currentUser?.rllyId === rllyId
+  const isOwnProfile = currentUser?.rllyId === user?.rllyId
   const displayUser = isOwnProfile ? currentUser : user
 
+  // Redirect from rllyId to username if available
+  useEffect(() => {
+    if (user && identifier.startsWith('rlly') && user.username) {
+      // Only redirect if we're on the rllyId URL and user has a username
+      router.replace(`/user/${user.username}`)
+    }
+  }, [user, identifier, router])
+
+  // Update document title with actual user data when available
+  useEffect(() => {
+    if (displayUser) {
+      const displayName = displayUser.name || displayUser.username || 'Profile'
+      document.title = `${displayName} | rlly.live`
+    }
+  }, [displayUser])
+
   // Show loading only when user data is still loading
-  if (user === undefined) {
+  if (userByUsername === undefined && userByRllyId === undefined) {
     return (
       <div className="flex-1 flex justify-center px-6 pt-16 pb-12">
         <div className="w-full max-w-2xl">
@@ -87,10 +109,7 @@ export function ProfileClient({ rllyId }: ProfileClientProps) {
               </div>
             </div>
           </div>
-          
-          {/* Divider Skeleton */}
-          <Skeleton className="h-px w-full mb-6" />
-
+        
           {/* Events Section Skeleton */}
           <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl shadow-lg">
             <div className="p-6 border-b border-border/50">
@@ -108,6 +127,9 @@ export function ProfileClient({ rllyId }: ProfileClientProps) {
   if (user === null) {
     notFound()
   }
+
+  // Get the best identifier for copying (username if available, otherwise rllyId)
+  const copyIdentifier = displayUser?.username || displayUser?.rllyId
 
   return (
     <div className="flex-1 flex justify-center px-6 pt-16 pb-12">
@@ -134,7 +156,7 @@ export function ProfileClient({ rllyId }: ProfileClientProps) {
                 <h1 className="font-display text-xl font-medium text-foreground truncate">
                   {displayUser?.name || displayUser?.username || "User"}
                 </h1>
-                <CopyLinkButton rllyId={displayUser?.rllyId} />
+                <CopyLinkButton identifier={copyIdentifier} />
               </div>
               
               <p className="text-sm text-muted-foreground mb-3">
@@ -154,10 +176,7 @@ export function ProfileClient({ rllyId }: ProfileClientProps) {
             </div>
           </div>
         </div>
-        
-        {/* Divider */}
-        <div className="border-t border-border/50 mb-6"></div>
-
+      
         {/* Events Section */}
         <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl shadow-lg">
           <div className="p-6 border-b border-border/50">
@@ -174,4 +193,4 @@ export function ProfileClient({ rllyId }: ProfileClientProps) {
       </div>
     </div>
   )
-}
+} 

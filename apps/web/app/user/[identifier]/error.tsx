@@ -56,4 +56,4 @@ export default function ProfileError({
       </div>
     </div>
   )
-}
+} 

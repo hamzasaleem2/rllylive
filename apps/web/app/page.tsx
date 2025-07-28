@@ -10,12 +10,15 @@ import { useEffect } from "react"
 function AuthenticatedHome() {
   const router = useRouter()
   const currentUser = useQuery(api.auth.getCurrentUser)
+  const profileIdentifier = useQuery(api.auth.getProfileIdentifier, { 
+    userId: currentUser?._id as any 
+  })
 
   useEffect(() => {
-    if (currentUser?.rllyId) {
-      router.replace(`/user/${currentUser.rllyId}`)
+    if (profileIdentifier) {
+      router.replace(`/user/${profileIdentifier}`)
     }
-  }, [currentUser, router])
+  }, [profileIdentifier, router])
 
   return null
 }

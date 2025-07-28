@@ -55,9 +55,13 @@ export function NotificationsTab() {
 
   // Initialize preferences if none exist
   useEffect(() => {
-    if (preferences !== undefined && Object.keys(preferences).length === 0) {
-      initializePreferences().catch(error => {
+    if (preferences !== undefined && preferences !== null && Object.keys(preferences).length === 0) {
+      initializePreferences().catch((error: any) => {
         console.error("Failed to initialize notification preferences:", error)
+        // Don't show toast for auth errors, just log them
+        if (!error.message?.includes("Unauthorized")) {
+          toast.error("Failed to initialize notification preferences")
+        }
       })
     }
   }, [preferences, initializePreferences])
@@ -78,8 +82,11 @@ export function NotificationsTab() {
     }))
   }
 
-  const getPreferenceValue = (category: string): "email" | "off" => {
-    return preferences?.[category] || "email"
+  const getPreferenceValue = (category: string): "email" | "off" | undefined => {
+    if (preferences === undefined || preferences === null) {
+      return undefined // Still loading or error
+    }
+    return preferences[category] || "email"
   }
 
   const getDisplayText = (channel: "email" | "off") => {
@@ -112,6 +119,7 @@ export function NotificationsTab() {
                 {section.items.map((item) => {
                   const currentValue = getPreferenceValue(item.key)
                   const isOpen = openDropdowns[item.key] || false
+                  const isLoading = currentValue === undefined
                   
                   return (
                     <div 
@@ -126,20 +134,27 @@ export function NotificationsTab() {
                             size="sm" 
                             className="h-8 px-3 text-sm flex items-center"
                             onClick={() => toggleDropdown(item.key)}
+                            disabled={isLoading}
                           >
                             <span className="flex items-center">
-                              {getDisplayText(currentValue)}
-                              {isOpen ? (
-                                <ChevronUp className="ml-2 h-3 w-3" />
+                              {isLoading ? (
+                                <div className="h-4 w-12 bg-muted animate-pulse rounded"></div>
                               ) : (
-                                <ChevronDown className="ml-2 h-3 w-3" />
+                                getDisplayText(currentValue || "email")
+                              )}
+                              {!isLoading && (
+                                isOpen ? (
+                                  <ChevronUp className="ml-2 h-3 w-3" />
+                                ) : (
+                                  <ChevronDown className="ml-2 h-3 w-3" />
+                                )
                               )}
                             </span>
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-32">
                           <DropdownMenuRadioGroup 
-                            value={currentValue}
+                            value={currentValue || "email"}
                             onValueChange={(value: string) => {
                               handlePreferenceChange(item.key, value as "email" | "off")
                               toggleDropdown(item.key)

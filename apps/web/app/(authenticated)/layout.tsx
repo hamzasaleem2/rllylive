@@ -1,6 +1,10 @@
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
+  title: {
+    template: "%s | rlly.live",
+    default: "rlly.live - Create events that actually happen"
+  },
   robots: "noindex, nofollow", // Authenticated pages shouldn't be indexed
 }
 
