@@ -10,6 +10,7 @@
 
 import type * as auth_config from "../auth/config.js";
 import type * as auth from "../auth.js";
+import type * as calendars from "../calendars.js";
 import type * as emails_components_BaseEmail from "../emails/components/BaseEmail.js";
 import type * as emails_verifyOTP from "../emails/verifyOTP.js";
 import type * as http from "../http.js";
@@ -33,6 +34,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   "auth/config": typeof auth_config;
   auth: typeof auth;
+  calendars: typeof calendars;
   "emails/components/BaseEmail": typeof emails_components_BaseEmail;
   "emails/verifyOTP": typeof emails_verifyOTP;
   http: typeof http;

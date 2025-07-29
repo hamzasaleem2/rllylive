@@ -1,4 +1,5 @@
 import { Metadata } from "next"
+import Link from "next/link"
 import { PageLayout } from "@/components/page-layout"
 import { Button } from "@workspace/ui/components/button"
 import { Plus } from "lucide-react"
@@ -14,9 +15,11 @@ export default function CalendarsPage() {
     <PageLayout
       title="Calendars"
       rightElement={
-        <Button variant="outline" size="sm" className="cursor-pointer">
-          <Plus className="h-4 w-4 mr-2" />
-          Create
+        <Button variant="outline" size="sm" className="cursor-pointer" asChild>
+          <Link href="/calendars/create">
+            <Plus className="h-4 w-4 mr-2" />
+            Create
+          </Link>
         </Button>
       }
     >

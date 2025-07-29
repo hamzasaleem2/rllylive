@@ -1,53 +1,38 @@
 "use client"
 
+import { useQuery } from "convex/react"
+import { api } from "@workspace/backend/convex/_generated/api.js"
 import { Card, CardContent } from "@workspace/ui/components/card"
 import { OptimizedAvatar } from "@/components/optimized-avatar"
 
-// Mock data for now - we'll replace this with real data later
-const mockCalendars = [
-  {
-    id: "1",
-    name: "Hmza",
-    avatar: "/api/placeholder/80/80", // This will be replaced with real user image
-    subscribers: 0,
-    isUserCalendar: true,
-  },
-  {
-    id: "2", 
-    name: "hmza's calendar",
-    avatar: null,
-    subscribers: 0,
-    isUserCalendar: false,
-    color: "bg-green-500", // Calendar-specific color
-  }
-]
+type CalendarWithSubscriberCount = {
+  _id: string
+  name: string
+  description?: string
+  color: string
+  publicUrl?: string
+  location?: string
+  isGlobal?: boolean
+  ownerId: string
+  coverImage?: string
+  subscriberCount: number
+}
 
-function CalendarCard({ calendar }: { calendar: typeof mockCalendars[0] }) {
+function CalendarCard({ calendar }: { calendar: CalendarWithSubscriberCount }) {
   return (
     <Card className="bg-card/50 backdrop-blur-sm border border-border/50 hover:border-border/80 transition-all duration-200 cursor-pointer group">
       <CardContent className="p-4 flex flex-col items-center text-center h-32">
         <div className="mb-3">
-          {calendar.isUserCalendar ? (
-            <OptimizedAvatar
-              src={calendar.avatar}
-              alt={calendar.name}
-              fallback={
-                <span className="bg-gradient-to-br from-live-green/20 to-primary/20 text-base font-medium w-full h-full flex items-center justify-center">
-                  {calendar.name.charAt(0).toUpperCase()}
-                </span>
-              }
-              className="w-14 h-14"
-              size={56}
-            />
-          ) : (
-            <div className={`w-14 h-14 rounded-full ${calendar.color || 'bg-green-500'} flex items-center justify-center`}>
-              <div className="grid grid-cols-3 gap-1">
-                {[...Array(9)].map((_, i) => (
-                  <div key={i} className="w-1 h-1 bg-white/80 rounded-full"></div>
-                ))}
-              </div>
+          <div 
+            className="w-14 h-14 rounded-full flex items-center justify-center"
+            style={{ backgroundColor: calendar.color }}
+          >
+            <div className="grid grid-cols-3 gap-1">
+              {[...Array(9)].map((_, i) => (
+                <div key={i} className="w-1 h-1 bg-white/80 rounded-full"></div>
+              ))}
             </div>
-          )}
+          </div>
         </div>
         
         {/* Calendar Name - Fixed at bottom */}
@@ -56,7 +41,7 @@ function CalendarCard({ calendar }: { calendar: typeof mockCalendars[0] }) {
             {calendar.name}
           </h3>
           <p className="text-xs text-muted-foreground truncate">
-            {calendar.subscribers === 0 ? "No Subscribers" : `${calendar.subscribers} Subscribers`}
+            {calendar.subscriberCount === 0 ? "No Subscribers" : `${calendar.subscriberCount} Subscribers`}
           </p>
         </div>
       </CardContent>
@@ -65,15 +50,36 @@ function CalendarCard({ calendar }: { calendar: typeof mockCalendars[0] }) {
 }
 
 export function CalendarGrid() {
+  const calendars = useQuery(api.calendars.getUserCalendars)
+
+  if (calendars === undefined) {
+    return (
+      <div>
+        <div className="mb-6">
+          <h2 className="text-lg font-medium text-foreground mb-4">My Calendars</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div>
       <div className="mb-6">
         <h2 className="text-lg font-medium text-foreground mb-4">My Calendars</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {mockCalendars.map((calendar) => (
-            <CalendarCard key={calendar.id} calendar={calendar} />
-          ))}
-        </div>
+        {calendars.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground mb-4">No calendars found</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {calendars.map((calendar) => (
+              <CalendarCard key={calendar._id} calendar={calendar} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
