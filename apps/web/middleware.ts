@@ -28,8 +28,14 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
   
-  // Protected routes (anything not signin or api)
-  if (!pathname.startsWith("/api") && pathname !== "/signin") {
+  // Public routes that don't require authentication
+  const publicRoutes = ["/signin"]
+  const isPublicRoute = publicRoutes.includes(pathname) || 
+                       pathname.startsWith("/api") ||
+                       pathname.startsWith("/user/") // Make all user profile pages public
+  
+  // Protected routes (anything not public)
+  if (!isPublicRoute) {
     if (!isAuthenticated) {
       return NextResponse.redirect(new URL("/signin", request.url))
     }

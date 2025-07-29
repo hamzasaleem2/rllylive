@@ -4,11 +4,7 @@ import Link from "next/link"
 import { useQuery } from "convex-helpers/react/cache/hooks"
 import { api } from "@workspace/backend/convex/_generated/api.js"
 import { authClient } from "@/lib/auth-client"
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@workspace/ui/components/avatar"
+import { OptimizedAvatar } from "@/components/optimized-avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,15 +41,17 @@ export function UserDropdown() {
       <DropdownMenuTrigger asChild>
         <button className="relative group cursor-pointer">
           <div className="relative">
-            <Avatar className="h-8 w-8 ring-2 ring-transparent group-hover:ring-live-green/30 transition-all duration-200 group-hover:scale-105">
-              <AvatarImage 
-                src={currentUser.image || undefined} 
-                alt={currentUser.name || currentUser.username || "User"} 
-              />
-              <AvatarFallback className="bg-gradient-to-br from-live-green/20 to-primary/20 text-xs font-medium">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
+            <OptimizedAvatar
+              src={currentUser.image}
+              alt={currentUser.name || currentUser.username || "User"}
+              fallback={
+                <span className="bg-gradient-to-br from-live-green/20 to-primary/20 text-xs font-medium w-full h-full flex items-center justify-center">
+                  {initials}
+                </span>
+              }
+              className="h-8 w-8 ring-2 ring-transparent group-hover:ring-live-green/30 transition-all duration-200 group-hover:scale-105"
+              size={32}
+            />
             
             {/* Subtle glow effect */}
             <div className="absolute inset-0 rounded-full bg-gradient-to-r from-live-green/20 to-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10 blur-sm" />
@@ -70,15 +68,17 @@ export function UserDropdown() {
         {/* User Info Section */}
         <div className="px-3 py-3">
           <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10">
-              <AvatarImage 
-                src={currentUser.image || undefined} 
-                alt={currentUser.name || currentUser.username || "User"} 
-              />
-              <AvatarFallback className="bg-gradient-to-br from-live-green/20 to-primary/20 text-sm font-medium">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
+            <OptimizedAvatar
+              src={currentUser.image}
+              alt={currentUser.name || currentUser.username || "User"}
+              fallback={
+                <span className="bg-gradient-to-br from-live-green/20 to-primary/20 text-sm font-medium w-full h-full flex items-center justify-center">
+                  {initials}
+                </span>
+              }
+              className="h-10 w-10"
+              size={40}
+            />
             
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">

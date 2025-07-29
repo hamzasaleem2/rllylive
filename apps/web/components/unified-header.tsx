@@ -2,16 +2,54 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { Logo } from "./logo"
 import { ThemeToggle } from "./theme-toggle"
 import { UserDropdown } from "./user-dropdown"
 import { Button } from "@workspace/ui/components/button"
 import { useAuthState } from "@/hooks/use-auth-state"
+import { Calendar, Users } from "lucide-react"
+
+function MainNavigation() {
+  const pathname = usePathname()
+  
+  const navItems = [
+    { name: "Events", href: "/events", icon: Users },
+    { name: "Calendars", href: "/calendars", icon: Calendar },
+  ]
+
+  return (
+    <nav className="flex items-center space-x-2 sm:space-x-4">
+      {navItems.map((item) => {
+        const isActive = pathname === item.href
+        return (
+          <Link
+            key={item.name}
+            href={item.href}
+            className={`flex items-center text-sm font-medium transition-colors p-1.5 sm:p-2 rounded-md ${
+              isActive
+                ? "text-foreground bg-muted/50"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
+            }`}
+            title={item.name}
+          >
+            <item.icon className="h-4 w-4" />
+            <span className="ml-2 hidden md:inline">{item.name}</span>
+          </Link>
+        )
+      })}
+    </nav>
+  )
+}
 
 function BaseHeader({ children }: { children: React.ReactNode }) {
   const [timeDisplay, setTimeDisplay] = useState("")
+  const [mounted, setMounted] = useState(false)
+  const { isAuthenticated } = useAuthState()
 
   useEffect(() => {
+    setMounted(true)
+    
     const updateTime = () => {
       const now = new Date()
       const time = now.toLocaleTimeString('en-US', { 
@@ -33,13 +71,26 @@ function BaseHeader({ children }: { children: React.ReactNode }) {
   return (
     <header className="flex-shrink-0 py-6">
       <div className="w-full px-6">
-        <div className="flex items-center justify-between">
+        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4">
+          {/* Left: Logo */}
           <Logo />
-
-          <div className="flex items-center space-x-4">
-            <div className="hidden sm:flex items-center text-xs text-muted-foreground/60 font-mono tracking-wider">
-              {timeDisplay}
-            </div>
+          
+          {/* Center: Navigation - only when authenticated */}
+          <div className="flex justify-center lg:justify-start">
+            {isAuthenticated && (
+              <div className="w-full max-w-4xl flex justify-start px-6">
+                <MainNavigation />
+              </div>
+            )}
+          </div>
+          
+          {/* Right: Controls */}
+          <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-4">
+            {mounted && (
+              <div className="hidden lg:flex items-center text-xs text-muted-foreground/60 font-mono tracking-wider">
+                {timeDisplay}
+              </div>
+            )}
             <ThemeToggle />
             {children}
           </div>
@@ -64,7 +115,12 @@ export function UnifiedHeader() {
   return (
     <BaseHeader>
       {isAuthenticated ? (
-        <UserDropdown />
+        <>
+          <Button variant="outline" size="sm" className="cursor-pointer">
+            Create Event
+          </Button>
+          <UserDropdown />
+        </>
       ) : (
         <Button variant="dark" size="xs" className="cursor-pointer" asChild>
           <Link href="/signin">Sign In</Link>

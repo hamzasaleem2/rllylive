@@ -27,6 +27,12 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: '*.convex.cloud',
+        port: '',
+        pathname: '/api/storage/**',
+      },
     ],
   },
 }

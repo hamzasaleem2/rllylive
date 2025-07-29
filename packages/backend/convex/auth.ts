@@ -133,7 +133,7 @@ import {
         return null;
       }
 
-      // Return public profile data including stored auth metadata
+      // Return public profile data (excluding email for privacy)
       return {
         _id: user._id,
         username: user.username,
@@ -141,7 +141,10 @@ import {
         _creationTime: user._creationTime,
         name: user.name,
         image: user.image,
-        email: user.email, // Consider if this should be public
+        bio: user.bio,
+        website: user.website,
+        twitter: user.twitter,
+        instagram: user.instagram,
       };
     },
   });
@@ -159,7 +162,7 @@ import {
         return null;
       }
 
-      // Return public profile data including stored auth metadata
+      // Return public profile data (excluding email for privacy)
       return {
         _id: user._id,
         username: user.username,
@@ -167,7 +170,10 @@ import {
         _creationTime: user._creationTime,
         name: user.name,
         image: user.image,
-        email: user.email, // Consider if this should be public
+        bio: user.bio,
+        website: user.website,
+        twitter: user.twitter,
+        instagram: user.instagram,
       };
     },
   });
