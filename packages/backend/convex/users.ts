@@ -159,6 +159,27 @@ export const updateProfileImage = mutation({
   },
 })
 
+export const getFileUrl = mutation({
+  args: {
+    storageId: v.id("_storage"),
+  },
+  handler: async (ctx, args) => {
+    const user = await betterAuthComponent.getAuthUser(ctx)
+    if (!user) {
+      throw new Error("Unauthorized")
+    }
+
+    // Get the file URL from storage
+    const fileUrl = await ctx.storage.getUrl(args.storageId)
+    
+    if (!fileUrl) {
+      throw new Error("Failed to get file URL")
+    }
+
+    return { imageUrl: fileUrl }
+  },
+})
+
 export const getNotificationPreferences = query({
   args: {},
   handler: async (ctx) => {

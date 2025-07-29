@@ -120,7 +120,7 @@ export function DateTimeSelector({
   const timeOptions = generateTimeOptions()
 
   return (
-    <div className="flex gap-3 p-3">
+    <div className="flex gap-3">
       {/* Timeline Section */}
       <div className="relative h-16 w-6">
         {/* Timeline */}
