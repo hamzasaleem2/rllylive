@@ -1,6 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useMutation, useQuery } from "convex/react"
+import { api } from "@workspace/backend/convex/_generated/api.js"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 import { PageLayout } from "@/components/page-layout"
 import { ImageUploader } from "./components/image-uploader"
 import { CalendarSelector } from "./components/calendar-selector"
@@ -10,10 +14,14 @@ import { DescriptionEditor } from "./components/description-editor"
 import { TicketsSelector } from "./components/tickets-selector"
 import { ApprovalToggle } from "./components/approval-toggle"
 import { CapacitySelector } from "./components/capacity-selector"
+import { PublicPrivateSelector } from "./components/public-private-selector"
 import { Button } from "@workspace/ui/components/button"
 import { type ITimezoneOption } from "react-timezone-select"
 
 export default function CreateEventPage() {
+  const router = useRouter()
+  const createEvent = useMutation(api.events.createEvent)
+  const userCalendars = useQuery(api.calendars.getUserCalendars)
   // Form state
   const [selectedCalendarId, setSelectedCalendarId] = useState("")
   const [eventName, setEventName] = useState("")
@@ -21,10 +29,34 @@ export default function CreateEventPage() {
   const [eventImageStorageId, setEventImageStorageId] = useState<string | null>(null)
   const [location, setLocation] = useState("")
   const [description, setDescription] = useState("")
-  const [startDate, setStartDate] = useState("")
-  const [startTime, setStartTime] = useState("")
-  const [endDate, setEndDate] = useState("")
-  const [endTime, setEndTime] = useState("")
+  
+  // Set default dates and times
+  const getDefaultStartDate = (): string => {
+    const today = new Date()
+    return today.toISOString().split('T')[0] || ""
+  }
+  
+  const getDefaultEndDate = (): string => {
+    const today = new Date()
+    return today.toISOString().split('T')[0] || ""
+  }
+  
+  const getDefaultStartTime = (): string => {
+    const now = new Date()
+    const nextHour = new Date(now.getTime() + 60 * 60 * 1000)
+    return `${nextHour.getHours().toString().padStart(2, '0')}:00`
+  }
+  
+  const getDefaultEndTime = (): string => {
+    const now = new Date()
+    const nextTwoHours = new Date(now.getTime() + 2 * 60 * 60 * 1000)
+    return `${nextTwoHours.getHours().toString().padStart(2, '0')}:00`
+  }
+  
+  const [startDate, setStartDate] = useState(getDefaultStartDate())
+  const [startTime, setStartTime] = useState(getDefaultStartTime())
+  const [endDate, setEndDate] = useState(getDefaultEndDate())
+  const [endTime, setEndTime] = useState(getDefaultEndTime())
   const [timezone, setTimezone] = useState<string | ITimezoneOption>(
     Intl.DateTimeFormat().resolvedOptions().timeZone
   )
@@ -38,6 +70,18 @@ export default function CreateEventPage() {
   const [hasCapacityLimit, setHasCapacityLimit] = useState(false)
   const [capacity, setCapacity] = useState<number | undefined>(undefined)
   const [waitingList, setWaitingList] = useState(false)
+  const [isPublic, setIsPublic] = useState(true)
+  
+  // Form submission state
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [nameError, setNameError] = useState("")
+
+  // Auto-select first calendar when calendars load
+  useEffect(() => {
+    if (userCalendars && userCalendars.length > 0 && !selectedCalendarId) {
+      setSelectedCalendarId(userCalendars[0]?._id || "")
+    }
+  }, [userCalendars, selectedCalendarId])
 
   const handleImageUpload = (imageUrl: string, storageId: string) => {
     setEventImage(imageUrl)
@@ -70,8 +114,79 @@ export default function CreateEventPage() {
     setCapacity(data.capacity)
     setWaitingList(data.waitingList)
   }
+
+  const handleSubmit = async () => {
+    if (isSubmitting) return
+
+    // Reset errors
+    setNameError("")
+
+    // Validation
+    if (!selectedCalendarId) {
+      toast.error("Please select a calendar")
+      return
+    }
+    
+    if (!eventName.trim()) {
+      setNameError("Event name is required")
+      return
+    }
+
+    if (!startDate || !startTime) {
+      toast.error("Please set a start date and time")
+      return
+    }
+
+    if (!endDate || !endTime) {
+      toast.error("Please set an end date and time")
+      return
+    }
+
+    try {
+      setIsSubmitting(true)
+
+      // Convert date/time to timestamps
+      const timezoneString = typeof timezone === 'string' ? timezone : timezone.value
+      const startDateTime = new Date(`${startDate}T${startTime}`)
+      const endDateTime = new Date(`${endDate}T${endTime}`)
+
+      const startTimestamp = startDateTime.getTime()
+      const endTimestamp = endDateTime.getTime()
+
+      // Create the event
+      await createEvent({
+        name: eventName,
+        description: description || undefined,
+        calendarId: selectedCalendarId as any,
+        startTime: startTimestamp,
+        endTime: endTimestamp,
+        timezone: timezoneString,
+        location: location || undefined,
+        imageUrl: eventImage || undefined,
+        imageStorageId: eventImageStorageId || undefined,
+        ticketType: ticketType,
+        ticketPrice: ticketType === "paid" ? ticketPrice : undefined,
+        ticketName: ticketName || undefined,
+        ticketDescription: ticketDescription || undefined,
+        requiresApproval: requireApproval,
+        hasCapacityLimit: hasCapacityLimit,
+        capacity: hasCapacityLimit ? capacity : undefined,
+        waitingList: hasCapacityLimit ? waitingList : false,
+        isPublic: isPublic
+      })
+
+      toast.success("Event created successfully!")
+      router.push("/events")
+    } catch (error) {
+      console.error("Error creating event:", error)
+      toast.error(error instanceof Error ? error.message : "Failed to create event")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
-    <PageLayout title="Create Event">
+    <PageLayout>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div>
             <ImageUploader
@@ -82,18 +197,31 @@ export default function CreateEventPage() {
           </div>
 
           <div className="space-y-6">
+            <div className="flex items-center justify-between">
               <CalendarSelector
                 selectedCalendarId={selectedCalendarId}
                 onCalendarChange={setSelectedCalendarId}
               />
+              <PublicPrivateSelector
+                isPublic={isPublic}
+                onVisibilityChange={setIsPublic}
+              />
+            </div>
 
             <div className="space-y-3">
               <input
                 type="text"
                 placeholder="Event Name"
                 value={eventName}
-                onChange={(e) => setEventName(e.target.value)}
-                className="w-full px-0 py-3 text-xl font-medium border-0 border-b-2 border-gray-300 dark:border-gray-600 rounded-none bg-transparent focus:outline-none focus:ring-0 focus:border-primary placeholder-muted-foreground"
+                onChange={(e) => {
+                  setEventName(e.target.value)
+                  if (nameError) setNameError("") // Clear error when user types
+                }}
+                className={`w-full px-0 py-3 text-lg font-medium border-0 border-b-2 rounded-none focus:outline-none focus:ring-0 placeholder-muted-foreground ${
+                  nameError 
+                    ? 'bg-red-100 border-red-500 focus:border-red-500' 
+                    : 'bg-transparent border-gray-300 dark:border-gray-600 focus:border-primary'
+                }`}
               />
             </div>
 
@@ -122,7 +250,7 @@ export default function CreateEventPage() {
 
             {/* Event Options Section */}
             <div className="space-y-4">
-              <h3 className="text-lg font-medium">Event Options</h3>
+              <h3 className="text-xs font-medium text-muted-foreground">Event Options</h3>
               
               <TicketsSelector
                 ticketType={ticketType}
@@ -147,11 +275,11 @@ export default function CreateEventPage() {
 
             <div className="pt-4">
               <Button
-                onClick={() => {}}
-                disabled={false}
-                className="w-full bg-foreground text-background hover:bg-foreground/90 py-3 text-base font-medium cursor-pointer"
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className="w-full bg-foreground text-background hover:bg-foreground/90 py-3 text-sm font-medium cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Create Event
+                {isSubmitting ? "Creating Event..." : "Create Event"}
               </Button>
             </div>
           </div>

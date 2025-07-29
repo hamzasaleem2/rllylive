@@ -108,7 +108,7 @@ export function ImageUploader({
   }
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative max-w-sm mx-auto ${className}`}>
       <div
         className={`aspect-square w-full border-2 border-dashed rounded-lg transition-all duration-200 cursor-pointer overflow-hidden ${
           dragOver 

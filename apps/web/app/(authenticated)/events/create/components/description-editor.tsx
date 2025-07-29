@@ -43,10 +43,10 @@ export function DescriptionEditor({ description, onDescriptionChange }: Descript
           onClick={() => setOpen(true)}
         >
           <div className="flex items-center gap-2 mb-2">
-            <FileText className="w-4 h-4" />
-            <span className="text-sm font-medium">Event Description</span>
+            <FileText className="w-3 h-3" />
+            <span className="text-xs font-medium">Event Description</span>
           </div>
-          <div className="text-sm text-muted-foreground truncate">
+          <div className="text-xs text-muted-foreground truncate">
             {description.replace(/\n/g, ' ')}
           </div>
         </div>
@@ -54,9 +54,9 @@ export function DescriptionEditor({ description, onDescriptionChange }: Descript
         <Button
           variant="outline"
           onClick={() => setOpen(true)}
-          className="w-full justify-start cursor-pointer"
+          className="w-full justify-start cursor-pointer text-sm"
         >
-          <Plus className="w-4 h-4 mr-2" />
+          <Plus className="w-3 h-3 mr-2" />
           Add Description
         </Button>
       )}

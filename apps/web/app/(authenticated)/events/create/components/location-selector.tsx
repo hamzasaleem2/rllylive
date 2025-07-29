@@ -23,20 +23,20 @@ export function LocationSelector({ location, onLocationChange }: LocationSelecto
     setOpen(false)
   }
 
-  const createZoomMeeting = () => {
-    // Placeholder for Zoom integration
-    handleLocationSelect("Zoom Meeting (Link will be generated)")
-  }
+  // const createZoomMeeting = () => {
+  //   // Placeholder for Zoom integration
+  //   handleLocationSelect("Zoom Meeting (Link will be generated)")
+  // }
 
-  const createGoogleMeet = () => {
-    // Placeholder for Google Meet integration  
-    handleLocationSelect("Google Meet (Link will be generated)")
-  }
+  // const createGoogleMeet = () => {
+  //   // Placeholder for Google Meet integration  
+  //   handleLocationSelect("Google Meet (Link will be generated)")
+  // }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" className="w-full justify-between font-normal cursor-pointer">
+        <Button variant="outline" className="w-full justify-between font-normal cursor-pointer text-sm">
           {location || "Enter location or virtual link"}
           <ChevronDown className="w-3 h-3" />
         </Button>
@@ -61,7 +61,7 @@ export function LocationSelector({ location, onLocationChange }: LocationSelecto
           </div>
 
           {/* Virtual Options */}
-          <div>
+          {/* <div>
             <h4 className="text-sm font-medium mb-2">Virtual Options</h4>
             <div className="space-y-2">
               <Button
@@ -82,7 +82,7 @@ export function LocationSelector({ location, onLocationChange }: LocationSelecto
                 <span>Create Google Meet</span>
               </Button>
             </div>
-          </div>
+          </div> */}
 
           {/* Info */}
           <div className="flex items-start gap-2 p-3 bg-muted/50 rounded">

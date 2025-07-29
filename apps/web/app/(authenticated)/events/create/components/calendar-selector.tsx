@@ -36,9 +36,12 @@ export function CalendarSelector({ selectedCalendarId, onCalendarChange }: Calen
       items-center gap-2 rounded-full px-3 py-2 cursor-pointer">
         <Avatar className="w-6 h-6">
           <AvatarImage src={selectedCalendar?.profileImage} />
-          <AvatarFallback />
+          <AvatarFallback 
+            className="w-6 h-6"
+            style={{ backgroundColor: selectedCalendar?.color || "#10b981" }}
+          />
         </Avatar>
-        <span className="font-medium text-sm">
+        <span className="font-medium text-xs">
           {selectedCalendar?.name || "Select a calendar"}
         </span>
         <ChevronDown className="w-4 h-4" />
@@ -57,7 +60,10 @@ export function CalendarSelector({ selectedCalendarId, onCalendarChange }: Calen
             <div className="flex items-center gap-2">
               <Avatar className="w-6 h-6">
                 <AvatarImage src={calendar.profileImage} />
-                <AvatarFallback />
+                <AvatarFallback 
+                  className="w-6 h-6"
+                  style={{ backgroundColor: calendar.color }}
+                />
               </Avatar>
               <span>{calendar.name}</span>
             </div>

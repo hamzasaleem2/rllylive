@@ -67,14 +67,14 @@ export function TicketsSelector({
         onClick={() => setOpen(true)}
       >
         <div className="flex items-center gap-3">
-          <Ticket className="w-5 h-5 text-muted-foreground" />
-          <span className="font-medium">Tickets</span>
+          <Ticket className="w-3 h-3 text-muted-foreground" />
+          <span className="font-medium text-xs">Tickets</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">
+          <span className="text-xs text-muted-foreground">
             {ticketType === "free" ? "Free" : `$${ticketPrice || 0}`}
           </span>
-          <Edit2 className="w-4 h-4 text-muted-foreground" />
+          <Edit2 className="w-3 h-3 text-muted-foreground" />
         </div>
       </div>
 

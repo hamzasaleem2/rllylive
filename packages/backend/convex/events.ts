@@ -10,19 +10,20 @@ export const createEvent = mutation({
     calendarId: v.id("calendars"),
     startTime: v.number(),
     endTime: v.number(),
+    timezone: v.string(),
     location: v.optional(v.string()),
-    isVirtual: v.optional(v.boolean()),
-    virtualLink: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
-    theme: v.optional(v.string()),
+    imageStorageId: v.optional(v.string()),
     // Ticket options
-    ticketsEnabled: v.optional(v.boolean()),
+    ticketType: v.union(v.literal("free"), v.literal("paid")),
     ticketPrice: v.optional(v.number()),
-    isFree: v.optional(v.boolean()),
+    ticketName: v.optional(v.string()),
+    ticketDescription: v.optional(v.string()),
     // Event options
     requiresApproval: v.optional(v.boolean()),
+    hasCapacityLimit: v.optional(v.boolean()),
     capacity: v.optional(v.number()),
-    isUnlimited: v.optional(v.boolean()),
+    waitingList: v.optional(v.boolean()),
     // Privacy
     isPublic: v.optional(v.boolean()),
   },
@@ -60,6 +61,16 @@ export const createEvent = mutation({
       throw new Error("End time must be after start time")
     }
 
+    // Validate ticket pricing
+    if (args.ticketType === "paid" && (!args.ticketPrice || args.ticketPrice <= 0)) {
+      throw new Error("Paid tickets must have a valid price")
+    }
+
+    // Validate capacity
+    if (args.hasCapacityLimit && (!args.capacity || args.capacity <= 0)) {
+      throw new Error("Capacity limit must be greater than 0")
+    }
+
     // Create the event
     const eventId = await ctx.db.insert("events", {
       name: args.name.trim(),
@@ -67,17 +78,19 @@ export const createEvent = mutation({
       calendarId: args.calendarId,
       startTime: args.startTime,
       endTime: args.endTime,
+      timezone: args.timezone,
       location: args.location?.trim(),
-      isVirtual: args.isVirtual || false,
-      virtualLink: args.virtualLink?.trim(),
       imageUrl: args.imageUrl,
-      theme: args.theme || "Minimal",
-      ticketsEnabled: args.ticketsEnabled || false,
-      ticketPrice: args.ticketPrice,
-      isFree: args.isFree ?? true,
+      imageStorageId: args.imageStorageId,
+      theme: "Minimal", // Default theme
+      ticketType: args.ticketType,
+      ticketPrice: args.ticketType === "paid" ? args.ticketPrice : undefined,
+      ticketName: args.ticketName?.trim(),
+      ticketDescription: args.ticketDescription?.trim(),
       requiresApproval: args.requiresApproval || false,
-      capacity: args.capacity,
-      isUnlimited: args.isUnlimited ?? true,
+      hasCapacityLimit: args.hasCapacityLimit || false,
+      capacity: args.hasCapacityLimit ? args.capacity : undefined,
+      waitingList: args.hasCapacityLimit ? (args.waitingList || false) : false,
       isPublic: args.isPublic ?? true,
       createdById: user.userId as any,
     })

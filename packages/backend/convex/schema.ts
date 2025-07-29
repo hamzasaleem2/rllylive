@@ -44,19 +44,23 @@ export default defineSchema({
     calendarId: v.id("calendars"),
     startTime: v.number(), // Unix timestamp
     endTime: v.number(), // Unix timestamp
+    timezone: v.string(), // Event timezone
     location: v.optional(v.string()),
     isVirtual: v.optional(v.boolean()),
     virtualLink: v.optional(v.string()),
-    imageUrl: v.optional(v.string()), // Event image
+    imageUrl: v.optional(v.string()), // Event image URL
+    imageStorageId: v.optional(v.string()), // Convex storage ID for image
     theme: v.optional(v.string()), // Theme name (e.g., "Minimal")
     // Ticket options
-    ticketsEnabled: v.optional(v.boolean()),
-    ticketPrice: v.optional(v.number()),
-    isFree: v.optional(v.boolean()),
+    ticketType: v.union(v.literal("free"), v.literal("paid")), // Ticket type
+    ticketPrice: v.optional(v.number()), // Price for paid tickets
+    ticketName: v.optional(v.string()), // Custom ticket name
+    ticketDescription: v.optional(v.string()), // Ticket description
     // Event options
     requiresApproval: v.optional(v.boolean()),
-    capacity: v.optional(v.number()),
-    isUnlimited: v.optional(v.boolean()),
+    hasCapacityLimit: v.optional(v.boolean()), // Whether capacity is limited
+    capacity: v.optional(v.number()), // Max capacity
+    waitingList: v.optional(v.boolean()), // Over-capacity waiting list
     // Privacy
     isPublic: v.optional(v.boolean()),
     createdById: v.id("users"),

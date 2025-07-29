@@ -12,8 +12,8 @@ export function ApprovalToggle({ requireApproval, onToggle }: ApprovalToggleProp
   return (
     <div className="flex items-center justify-between p-4 border rounded-lg">
       <div className="flex items-center gap-3">
-        <UserCheck className="w-5 h-5 text-muted-foreground" />
-        <span className="font-medium">Require Approval</span>
+        <UserCheck className="w-3 h-3 text-muted-foreground" />
+        <span className="font-medium text-xs">Require Approval</span>
       </div>
       <Switch
         checked={requireApproval}
