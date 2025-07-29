@@ -16,10 +16,12 @@ export function Header() {
         hour: '2-digit', 
         minute: '2-digit' 
       })
-      const offset = -now.getTimezoneOffset() / 60
-      const sign = offset >= 0 ? '+' : ''
-      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone.split('/').pop()?.replace('_', ' ')
-      setTimeDisplay(`${time} UTC${sign}${offset} ${tz}`)
+      const tz = now.toLocaleDateString('en', {
+        day: '2-digit',
+        timeZoneName: 'short',
+      }).split(', ')[1]
+      const city = Intl.DateTimeFormat().resolvedOptions().timeZone.split('/').pop()?.replace('_', ' ')
+      setTimeDisplay(`${time} ${tz} ${city}`)
     }
 
     updateTime()
