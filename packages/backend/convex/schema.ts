@@ -38,6 +38,33 @@ export default defineSchema({
   .index("by_user", ["userId"])
   .index("by_calendar_user", ["calendarId", "userId"]),
 
+  events: defineTable({
+    name: v.string(),
+    description: v.optional(v.string()),
+    calendarId: v.id("calendars"),
+    startTime: v.number(), // Unix timestamp
+    endTime: v.number(), // Unix timestamp
+    location: v.optional(v.string()),
+    isVirtual: v.optional(v.boolean()),
+    virtualLink: v.optional(v.string()),
+    imageUrl: v.optional(v.string()), // Event image
+    theme: v.optional(v.string()), // Theme name (e.g., "Minimal")
+    // Ticket options
+    ticketsEnabled: v.optional(v.boolean()),
+    ticketPrice: v.optional(v.number()),
+    isFree: v.optional(v.boolean()),
+    // Event options
+    requiresApproval: v.optional(v.boolean()),
+    capacity: v.optional(v.number()),
+    isUnlimited: v.optional(v.boolean()),
+    // Privacy
+    isPublic: v.optional(v.boolean()),
+    createdById: v.id("users"),
+  })
+  .index("by_calendar", ["calendarId"])
+  .index("by_creator", ["createdById"])
+  .index("by_start_time", ["startTime"]),
+
   notificationPreferences: defineTable({
     userId: v.id("users"),
     category: v.string(),

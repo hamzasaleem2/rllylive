@@ -116,8 +116,10 @@ export function UnifiedHeader() {
     <BaseHeader>
       {isAuthenticated ? (
         <>
-          <Button variant="outline" size="sm" className="cursor-pointer">
-            Create Event
+          <Button variant="outline" size="sm" className="cursor-pointer" asChild>
+            <Link href="/events/create">
+              Create Event
+            </Link>
           </Button>
           <UserDropdown />
         </>
