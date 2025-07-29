@@ -14,25 +14,36 @@ type CalendarWithSubscriberCount = {
   location?: string
   isGlobal?: boolean
   ownerId: string
+  profileImage?: string
   coverImage?: string
   subscriberCount: number
 }
 
 function CalendarCard({ calendar }: { calendar: CalendarWithSubscriberCount }) {
   return (
-    <Card className="bg-card/50 backdrop-blur-sm border border-border/50 hover:border-border/80 transition-all duration-200 cursor-pointer group">
+    <Card className="bg-card/50 backdrop-blur-sm border border-border/50 hover:border-border/80 transition-all duration-200 cursor-pointer group overflow-hidden">
       <CardContent className="p-4 flex flex-col items-center text-center h-32">
         <div className="mb-3">
-          <div 
-            className="w-14 h-14 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: calendar.color }}
-          >
-            <div className="grid grid-cols-3 gap-1">
-              {[...Array(9)].map((_, i) => (
-                <div key={i} className="w-1 h-1 bg-white/80 rounded-full"></div>
-              ))}
+          {calendar.profileImage ? (
+            <div className="w-14 h-14 rounded-full overflow-hidden">
+              <img 
+                src={calendar.profileImage}
+                alt={calendar.name}
+                className="w-full h-full object-cover"
+              />
             </div>
-          </div>
+          ) : (
+            <div 
+              className="w-14 h-14 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: calendar.color }}
+            >
+              <div className="grid grid-cols-3 gap-1">
+                {[...Array(9)].map((_, i) => (
+                  <div key={i} className="w-1 h-1 bg-white/80 rounded-full"></div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
         
         {/* Calendar Name - Fixed at bottom */}

@@ -11,6 +11,8 @@ export const createCalendar = mutation({
     publicUrl: v.optional(v.string()),
     location: v.optional(v.string()),
     isGlobal: v.optional(v.boolean()),
+    profileImageStorageId: v.optional(v.id("_storage")), // Storage ID for profile image
+    coverImageStorageId: v.optional(v.id("_storage")), // Storage ID for cover image
   },
   handler: async (ctx, args) => {
     const user = await betterAuthComponent.getAuthUser(ctx)
@@ -48,6 +50,26 @@ export const createCalendar = mutation({
       }
     }
 
+    // Convert storage IDs to URLs if provided
+    let profileImageUrl: string | undefined
+    let coverImageUrl: string | undefined
+
+    if (args.profileImageStorageId) {
+      const url = await ctx.storage.getUrl(args.profileImageStorageId)
+      if (!url) {
+        throw new Error("Failed to get profile image URL")
+      }
+      profileImageUrl = url
+    }
+
+    if (args.coverImageStorageId) {
+      const url = await ctx.storage.getUrl(args.coverImageStorageId)
+      if (!url) {
+        throw new Error("Failed to get cover image URL")
+      }
+      coverImageUrl = url
+    }
+
     // Create the calendar
     const calendarId = await ctx.db.insert("calendars", {
       name: args.name.trim(),
@@ -57,6 +79,8 @@ export const createCalendar = mutation({
       location: args.location?.trim(),
       isGlobal: args.isGlobal || false,
       ownerId: user.userId as any,
+      profileImage: profileImageUrl,
+      coverImage: coverImageUrl,
     })
 
     return { calendarId }

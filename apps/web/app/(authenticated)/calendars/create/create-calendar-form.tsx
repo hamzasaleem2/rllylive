@@ -8,8 +8,9 @@ import { Button } from "@workspace/ui/components/button"
 import { Input } from "@workspace/ui/components/input"
 import { Textarea } from "@workspace/ui/components/textarea"
 import { Card, CardContent } from "@workspace/ui/components/card"
+import { Skeleton } from "@workspace/ui/components/skeleton"
 import { toast } from "sonner"
-import { Upload, Camera } from "lucide-react"
+import { Upload, Camera, X } from "lucide-react"
 import { LocationMap } from "@/components/location-map"
 
 const DEFAULT_COLORS = [
@@ -28,6 +29,7 @@ const DEFAULT_COLORS = [
 export function CreateCalendarForm() {
   const router = useRouter()
   const createCalendar = useMutation(api.calendars.createCalendar)
+  const generateUploadUrl = useMutation(api.users.generateUploadUrl)
   
   const [formData, setFormData] = useState({
     name: "",
@@ -40,6 +42,10 @@ export function CreateCalendarForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [profileImage, setProfileImage] = useState<string | null>(null)
   const [coverImage, setCoverImage] = useState<string | null>(null)
+  const [profileImageId, setProfileImageId] = useState<string | null>(null)
+  const [coverImageId, setCoverImageId] = useState<string | null>(null)
+  const [isUploadingProfile, setIsUploadingProfile] = useState(false)
+  const [isUploadingCover, setIsUploadingCover] = useState(false)
   const [nameError, setNameError] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -62,6 +68,8 @@ export function CreateCalendarForm() {
         publicUrl: formData.publicUrl.trim() || undefined,
         location: formData.location.trim() || undefined,
         isGlobal: formData.isGlobal,
+        profileImageStorageId: profileImageId as any || undefined,
+        coverImageStorageId: coverImageId as any || undefined,
       })
       
       toast.success("Calendar created successfully!")
@@ -92,20 +100,111 @@ export function CreateCalendarForm() {
     }
   }
 
+  const handleImageUpload = async (file: File, type: 'profile' | 'cover') => {
+    if (!file) return
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Please select a valid image file (JPEG, PNG, WebP, or GIF)")
+      return
+    }
+
+    // Validate file size (10MB max)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Image size must be less than 10MB")
+      return
+    }
+
+    if (type === 'profile') {
+      setIsUploadingProfile(true)
+    } else {
+      setIsUploadingCover(true)
+    }
+
+    try {
+      // Generate upload URL
+      const uploadUrl = await generateUploadUrl()
+      
+      // Upload file to Convex storage
+      const result = await fetch(uploadUrl, {
+        method: "POST",
+        headers: { "Content-Type": file.type },
+        body: file,
+      })
+
+      if (!result.ok) {
+        throw new Error("Failed to upload image")
+      }
+
+      const { storageId } = await result.json()
+
+      // Set the storage ID and preview image
+      if (type === 'profile') {
+        setProfileImageId(storageId)
+        const reader = new FileReader()
+        reader.onload = (e) => setProfileImage(e.target?.result as string)
+        reader.readAsDataURL(file)
+      } else {
+        setCoverImageId(storageId)
+        const reader = new FileReader()
+        reader.onload = (e) => setCoverImage(e.target?.result as string)
+        reader.readAsDataURL(file)
+      }
+      
+      toast.success(`${type === 'profile' ? 'Profile' : 'Cover'} image uploaded successfully!`)
+    } catch (error) {
+      toast.error("Failed to upload image. Please try again.")
+      console.error("Upload error:", error)
+    } finally {
+      if (type === 'profile') {
+        setIsUploadingProfile(false)
+      } else {
+        setIsUploadingCover(false)
+      }
+    }
+  }
+
   return (
     <form onSubmit={handleSubmit} className="max-w-2xl space-y-8">
       {/* Cover Image */}
       <div className="relative">
         <div 
-          className="h-48 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-lg flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity"
-          onClick={() => document.getElementById('cover-upload')?.click()}
+          className="h-48 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-200/80 dark:to-gray-200/80 rounded-lg flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity relative overflow-hidden"
+          onClick={() => !isUploadingCover && document.getElementById('cover-upload')?.click()}
         >
           {coverImage ? (
-            <img src={coverImage} alt="Cover" className="w-full h-full object-cover rounded-lg" />
+            <>
+              <img src={coverImage} alt="Cover" className="w-full h-full object-cover rounded-lg" />
+              <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors duration-200" />
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setCoverImage(null)
+                  setCoverImageId(null)
+                }}
+                className="absolute top-3 right-3 w-8 h-8 bg-white/90 hover:bg-white dark:bg-gray-200/80 dark:hover:bg-gray-300/80 text-gray-700 dark:text-gray-600 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110 backdrop-blur-sm cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </>
+          ) : isUploadingCover ? (
+            <div className="w-full h-full flex items-center justify-center">
+              <Skeleton className="w-full h-full rounded-lg" />
+            </div>
           ) : (
-            <div className="flex flex-col items-center gap-2">
-              <Camera className="w-6 h-6 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Add Cover Photo</span>
+            <div className="absolute top-3 right-3">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  document.getElementById('cover-upload')?.click()
+                }}
+                className="px-3 py-1.5 bg-gray-200/80 hover:bg-gray-300/80 dark:bg-gray-200/80 dark:hover:bg-gray-300/80 text-gray-600 dark:text-gray-600 text-sm font-medium rounded-full transition-all duration-200 shadow-sm hover:shadow-md backdrop-blur-sm border border-gray-300/50 dark:border-gray-300/50 cursor-pointer"
+              >
+                Change Cover
+              </button>
             </div>
           )}
         </div>
@@ -117,9 +216,7 @@ export function CreateCalendarForm() {
           onChange={(e) => {
             const file = e.target.files?.[0]
             if (file) {
-              const reader = new FileReader()
-              reader.onload = (e) => setCoverImage(e.target?.result as string)
-              reader.readAsDataURL(file)
+              handleImageUpload(file, 'cover')
             }
           }}
         />
@@ -129,17 +226,30 @@ export function CreateCalendarForm() {
       <div className="flex items-start gap-6">
         <div className="relative">
           <div 
-            className="w-20 h-20 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800/70 flex items-center justify-center relative cursor-pointer transition-all duration-200 group"
-            onClick={() => document.getElementById('profile-upload')?.click()}
+            className="w-20 h-20 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-300 bg-gray-50 dark:bg-gray-200/80 hover:bg-gray-100 dark:hover:bg-gray-300/80 flex items-center justify-center relative cursor-pointer transition-all duration-200 group overflow-hidden"
+            onClick={() => !isUploadingProfile && document.getElementById('profile-upload')?.click()}
           >
             {profileImage ? (
-              <img src={profileImage} alt="Profile" className="w-full h-full object-cover rounded-2xl" />
+              <>
+                <img src={profileImage} alt="Profile" className="w-full h-full object-cover rounded-2xl" />
+                <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors duration-200 rounded-2xl" />
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setProfileImage(null)
+                    setProfileImageId(null)
+                  }}
+                  className="absolute top-1 right-1 w-6 h-6 bg-white/90 hover:bg-white dark:bg-gray-200/80 dark:hover:bg-gray-300/80 text-gray-700 dark:text-gray-600 rounded-full flex items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg hover:scale-110 backdrop-blur-sm border border-gray-200/50 dark:border-gray-300/50 cursor-pointer"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </>
+            ) : isUploadingProfile ? (
+              <Skeleton className="w-full h-full rounded-2xl" />
             ) : (
-              <div className="flex flex-col items-center gap-1">
-                <Upload className="w-6 h-6 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-400 transition-colors" />
-                <span className="text-xs text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-400 transition-colors font-medium">
-                  Upload
-                </span>
+              <div className="flex items-center justify-center">
+                <Upload className="w-6 h-6 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-600 transition-colors" />
               </div>
             )}
           </div>
@@ -151,9 +261,7 @@ export function CreateCalendarForm() {
             onChange={(e) => {
               const file = e.target.files?.[0]
               if (file) {
-                const reader = new FileReader()
-                reader.onload = (e) => setProfileImage(e.target?.result as string)
-                reader.readAsDataURL(file)
+                handleImageUpload(file, 'profile')
               }
             }}
           />

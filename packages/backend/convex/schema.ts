@@ -24,6 +24,7 @@ export default defineSchema({
     location: v.optional(v.string()),
     isGlobal: v.optional(v.boolean()), // true for global, false for city-specific
     ownerId: v.id("users"),
+    profileImage: v.optional(v.string()), // Storage ID for profile image
     coverImage: v.optional(v.string()), // Storage ID for cover image
   })
   .index("by_owner", ["ownerId"])
