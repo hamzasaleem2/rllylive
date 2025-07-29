@@ -7,6 +7,9 @@ import { CalendarSelector } from "./components/calendar-selector"
 import { DateTimeSelector } from "./components/date-time-selector"
 import { LocationSelector } from "./components/location-selector"
 import { DescriptionEditor } from "./components/description-editor"
+import { TicketsSelector } from "./components/tickets-selector"
+import { ApprovalToggle } from "./components/approval-toggle"
+import { CapacitySelector } from "./components/capacity-selector"
 import { Button } from "@workspace/ui/components/button"
 import { type ITimezoneOption } from "react-timezone-select"
 
@@ -25,6 +28,16 @@ export default function CreateEventPage() {
   const [timezone, setTimezone] = useState<string | ITimezoneOption>(
     Intl.DateTimeFormat().resolvedOptions().timeZone
   )
+  
+  // Event options state
+  const [ticketType, setTicketType] = useState<"free" | "paid">("free")
+  const [ticketPrice, setTicketPrice] = useState<number | undefined>(undefined)
+  const [ticketName, setTicketName] = useState<string | undefined>(undefined)
+  const [ticketDescription, setTicketDescription] = useState<string | undefined>(undefined)
+  const [requireApproval, setRequireApproval] = useState(false)
+  const [hasCapacityLimit, setHasCapacityLimit] = useState(false)
+  const [capacity, setCapacity] = useState<number | undefined>(undefined)
+  const [waitingList, setWaitingList] = useState(false)
 
   const handleImageUpload = (imageUrl: string, storageId: string) => {
     setEventImage(imageUrl)
@@ -34,6 +47,28 @@ export default function CreateEventPage() {
   const handleImageRemove = () => {
     setEventImage(null)
     setEventImageStorageId(null)
+  }
+
+  const handleTicketChange = (data: {
+    type: "free" | "paid"
+    price?: number
+    name?: string
+    description?: string
+  }) => {
+    setTicketType(data.type)
+    setTicketPrice(data.price)
+    setTicketName(data.name)
+    setTicketDescription(data.description)
+  }
+
+  const handleCapacityChange = (data: {
+    hasLimit: boolean
+    capacity?: number
+    waitingList: boolean
+  }) => {
+    setHasCapacityLimit(data.hasLimit)
+    setCapacity(data.capacity)
+    setWaitingList(data.waitingList)
   }
   return (
     <PageLayout title="Create Event">
@@ -84,6 +119,31 @@ export default function CreateEventPage() {
               description={description}
               onDescriptionChange={setDescription}
             />
+
+            {/* Event Options Section */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium">Event Options</h3>
+              
+              <TicketsSelector
+                ticketType={ticketType}
+                ticketPrice={ticketPrice}
+                ticketName={ticketName}
+                ticketDescription={ticketDescription}
+                onTicketChange={handleTicketChange}
+              />
+
+              <ApprovalToggle
+                requireApproval={requireApproval}
+                onToggle={setRequireApproval}
+              />
+
+              <CapacitySelector
+                hasLimit={hasCapacityLimit}
+                capacity={capacity}
+                waitingList={waitingList}
+                onCapacityChange={handleCapacityChange}
+              />
+            </div>
 
             <div className="pt-4">
               <Button
