@@ -19,7 +19,7 @@ export function Header() {
       const offset = -now.getTimezoneOffset() / 60
       const sign = offset >= 0 ? '+' : ''
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone.split('/').pop()?.replace('_', ' ')
-      setTimeDisplay(`${time} GMT${sign}${offset} ${tz}`)
+      setTimeDisplay(`${time} UTC${sign}${offset} ${tz}`)
     }
 
     updateTime()
