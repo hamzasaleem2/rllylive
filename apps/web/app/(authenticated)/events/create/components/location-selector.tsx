@@ -36,7 +36,7 @@ export function LocationSelector({ location, onLocationChange }: LocationSelecto
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" className="w-full justify-between font-normal">
+        <Button variant="outline" className="w-full justify-between font-normal cursor-pointer">
           {location || "Enter location or virtual link"}
           <ChevronDown className="w-3 h-3" />
         </Button>
@@ -66,7 +66,7 @@ export function LocationSelector({ location, onLocationChange }: LocationSelecto
             <div className="space-y-2">
               <Button
                 variant="ghost"
-                className="w-full justify-start h-auto p-3"
+                className="w-full justify-start h-auto p-3 cursor-pointer"
                 onClick={createZoomMeeting}
               >
                 <Video className="w-4 h-4 mr-3" />
@@ -75,7 +75,7 @@ export function LocationSelector({ location, onLocationChange }: LocationSelecto
               
               <Button
                 variant="ghost"
-                className="w-full justify-start h-auto p-3"
+                className="w-full justify-start h-auto p-3 cursor-pointer"
                 onClick={createGoogleMeet}
               >
                 <Video className="w-4 h-4 mr-3" />

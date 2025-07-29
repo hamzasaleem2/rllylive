@@ -33,7 +33,7 @@ export function CalendarSelector({ selectedCalendarId, onCalendarChange }: Calen
     <>
       <DropdownMenu>
       <DropdownMenuTrigger className="flex 
-      items-center gap-2 rounded-full px-3 py-2">
+      items-center gap-2 rounded-full px-3 py-2 cursor-pointer">
         <Avatar className="w-6 h-6">
           <AvatarImage src={selectedCalendar?.profileImage} />
           <AvatarFallback />
@@ -52,7 +52,7 @@ export function CalendarSelector({ selectedCalendarId, onCalendarChange }: Calen
           <DropdownMenuItem
             key={calendar._id}
             onClick={() => onCalendarChange(calendar._id)}
-            className="flex items-center justify-between"
+            className="flex items-center justify-between cursor-pointer"
           >
             <div className="flex items-center gap-2">
               <Avatar className="w-6 h-6">
@@ -69,7 +69,7 @@ export function CalendarSelector({ selectedCalendarId, onCalendarChange }: Calen
         
         <DropdownMenuItem 
           onClick={() => setShowCreateDialog(true)}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 cursor-pointer"
         >
         <Avatar className="w-6 h-6 inline-flex items-center justify-center">
         <Plus />

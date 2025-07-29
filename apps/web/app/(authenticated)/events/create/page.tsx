@@ -6,6 +6,7 @@ import { ImageUploader } from "./components/image-uploader"
 import { CalendarSelector } from "./components/calendar-selector"
 import { DateTimeSelector } from "./components/date-time-selector"
 import { LocationSelector } from "./components/location-selector"
+import { DescriptionEditor } from "./components/description-editor"
 import { Button } from "@workspace/ui/components/button"
 import { type ITimezoneOption } from "react-timezone-select"
 
@@ -16,6 +17,7 @@ export default function CreateEventPage() {
   const [eventImage, setEventImage] = useState<string | null>(null)
   const [eventImageStorageId, setEventImageStorageId] = useState<string | null>(null)
   const [location, setLocation] = useState("")
+  const [description, setDescription] = useState("")
   const [startDate, setStartDate] = useState("")
   const [startTime, setStartTime] = useState("")
   const [endDate, setEndDate] = useState("")
@@ -78,11 +80,16 @@ export default function CreateEventPage() {
               onLocationChange={setLocation}
             />
 
+            <DescriptionEditor
+              description={description}
+              onDescriptionChange={setDescription}
+            />
+
             <div className="pt-4">
               <Button
                 onClick={() => {}}
                 disabled={false}
-                className="w-full bg-foreground text-background hover:bg-foreground/90 py-3 text-base font-medium"
+                className="w-full bg-foreground text-background hover:bg-foreground/90 py-3 text-base font-medium cursor-pointer"
               >
                 Create Event
               </Button>

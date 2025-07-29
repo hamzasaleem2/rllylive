@@ -130,7 +130,7 @@ export function ImageUploader({
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200" />
             <button
               onClick={handleRemove}
-              className="absolute top-2 right-2 w-6 h-6 bg-white/90 hover:bg-white text-gray-700 rounded-full flex items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg hover:scale-110 opacity-0 group-hover:opacity-100"
+              className="absolute top-2 right-2 w-6 h-6 bg-white/90 hover:bg-white text-gray-700 rounded-full flex items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg hover:scale-110 opacity-0 group-hover:opacity-100 cursor-pointer"
             >
               <X className="w-3 h-3" />
             </button>

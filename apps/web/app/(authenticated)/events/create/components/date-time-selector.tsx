@@ -141,7 +141,7 @@ export function DateTimeSelector({
           
           <Popover open={startDateOpen} onOpenChange={setStartDateOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="justify-between font-normal w-28">
+              <Button variant="outline" size="sm" className="justify-between font-normal w-28 cursor-pointer">
                 {formatDate(startDate)}
                 <ChevronDown className="w-3 h-3" />
               </Button>
@@ -157,7 +157,7 @@ export function DateTimeSelector({
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="justify-between font-normal">
+              <Button variant="outline" size="sm" className="justify-between font-normal cursor-pointer">
                 {formatTime(startTime)}
                 <ChevronDown className="w-3 h-3" />
               </Button>
@@ -167,7 +167,7 @@ export function DateTimeSelector({
                 <DropdownMenuItem
                   key={time.value}
                   onClick={() => onStartTimeChange(time.value)}
-                  className="text-sm"
+                  className="text-sm cursor-pointer"
                 >
                   {time.label}
                 </DropdownMenuItem>
@@ -182,7 +182,7 @@ export function DateTimeSelector({
           
           <Popover open={endDateOpen} onOpenChange={setEndDateOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="justify-between font-normal w-28">
+              <Button variant="outline" size="sm" className="justify-between font-normal w-28 cursor-pointer">
                 {formatDate(endDate)}
                 <ChevronDown className="w-3 h-3" />
               </Button>
@@ -198,7 +198,7 @@ export function DateTimeSelector({
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="justify-between font-normal">
+              <Button variant="outline" size="sm" className="justify-between font-normal cursor-pointer">
                 {formatTime(endTime)}
                 <ChevronDown className="w-3 h-3" />
               </Button>
@@ -208,7 +208,7 @@ export function DateTimeSelector({
                 <DropdownMenuItem
                   key={time.value}
                   onClick={() => onEndTimeChange(time.value)}
-                  className="text-sm"
+                  className="text-sm cursor-pointer"
                 >
                   {time.label}
                 </DropdownMenuItem>
@@ -222,7 +222,7 @@ export function DateTimeSelector({
       <div className="flex items-center">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="flex-col h-16 px-3">
+            <Button variant="outline" size="sm" className="flex-col h-16 px-3 cursor-pointer">
               <span className="text-xs font-mono">{selectedOption?.label?.split(' ')[0] || ''}</span>
               <span className="text-xs">{selectedOption?.value?.split('/')[1]?.replace(/_/g, ' ') || ''}</span>
             </Button>
@@ -233,7 +233,7 @@ export function DateTimeSelector({
               <DropdownMenuItem
                 key={option.value}
                 onClick={() => onTimezoneChange(parseTimezone(option.value))}
-                className="flex items-center justify-between"
+                className="flex items-center justify-between cursor-pointer"
               >
                 <div className="flex-1">
                   <div className="font-medium text-sm">{option.label}</div>
