@@ -10,11 +10,10 @@ import { Textarea } from "@workspace/ui/components/textarea"
 import { Label } from "@workspace/ui/components/label"
 import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar"
 import { Skeleton } from "@workspace/ui/components/skeleton"
-import { Upload, Save, Loader2, Instagram, Twitter, Youtube, Linkedin, Globe, Check, X } from "lucide-react"
+import { Save, Loader2, Check, X, ArrowUpIcon } from "lucide-react"
 import { toast } from "sonner"
 import Image from "next/image"
 import { useDebounce } from "use-debounce"
-import { authClient } from "@/lib/auth-client"
 
 export function AccountTab() {
   const currentUser : any = useQuery(api.auth.getCurrentUser)
@@ -414,16 +413,7 @@ export function AccountTab() {
                   {isUploading ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
                   ) : (
-                    <Image
-                      src="/assets/file-front-clay.png"
-                      alt="Upload"
-                      width={24}
-                      height={24}
-                      className="w-6 h-6"
-                      quality={100}
-                      unoptimized
-                      style={{ imageRendering: 'auto' }}
-                    />
+                    <ArrowUpIcon className="w-6 h-6 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-600 transition-colors" />
                   )}
                 </button>
               </div>

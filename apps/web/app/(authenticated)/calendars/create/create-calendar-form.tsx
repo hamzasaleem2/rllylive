@@ -10,7 +10,7 @@ import { Textarea } from "@workspace/ui/components/textarea"
 import { Card, CardContent } from "@workspace/ui/components/card"
 import { Skeleton } from "@workspace/ui/components/skeleton"
 import { toast } from "sonner"
-import { Upload, Camera, X } from "lucide-react"
+import { ArrowUpIcon, X } from "lucide-react"
 import { LocationMap } from "@/components/location-map"
 
 const DEFAULT_COLORS = [
@@ -167,124 +167,103 @@ export function CreateCalendarForm() {
 
   return (
     <form onSubmit={handleSubmit} className="max-w-2xl space-y-8">
-      {/* Cover Image */}
-      <div className="relative">
-        <div 
-          className="h-48 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-200/80 dark:to-gray-200/80 rounded-lg flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity relative overflow-hidden"
-          onClick={() => !isUploadingCover && document.getElementById('cover-upload')?.click()}
-        >
-          {coverImage ? (
-            <>
-              <img src={coverImage} alt="Cover" className="w-full h-full object-cover rounded-lg" />
-              <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors duration-200" />
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setCoverImage(null)
-                  setCoverImageId(null)
-                }}
-                className="absolute top-3 right-3 w-8 h-8 bg-white/90 hover:bg-white dark:bg-gray-200/80 dark:hover:bg-gray-300/80 text-gray-700 dark:text-gray-600 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110 backdrop-blur-sm cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </>
-          ) : isUploadingCover ? (
-            <div className="w-full h-full flex items-center justify-center">
-              <Skeleton className="w-full h-full rounded-lg" />
-            </div>
-          ) : (
-            <div className="absolute top-3 right-3">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  document.getElementById('cover-upload')?.click()
-                }}
-                className="px-3 py-1.5 bg-gray-200/80 hover:bg-gray-300/80 dark:bg-gray-200/80 dark:hover:bg-gray-300/80 text-gray-600 dark:text-gray-600 text-sm font-medium rounded-full transition-all duration-200 shadow-sm hover:shadow-md backdrop-blur-sm border border-gray-300/50 dark:border-gray-300/50 cursor-pointer"
-              >
-                Change Cover
-              </button>
-            </div>
-          )}
-        </div>
-        <input
-          id="cover-upload"
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0]
-            if (file) {
-              handleImageUpload(file, 'cover')
-            }
-          }}
-        />
-      </div>
-
-      {/* Profile Icon and Name */}
-      <div className="flex items-start gap-6">
+      {/* Cover Image and Form Card */}
+      <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg overflow-hidden">
+        {/* Cover Image */}
         <div className="relative">
           <div 
-            className="w-20 h-20 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-300 bg-gray-50 dark:bg-gray-200/80 hover:bg-gray-100 dark:hover:bg-gray-300/80 flex items-center justify-center relative cursor-pointer transition-all duration-200 group overflow-hidden"
-            onClick={() => !isUploadingProfile && document.getElementById('profile-upload')?.click()}
+            className="h-48 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-200/80 dark:to-gray-200/80 flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity relative overflow-hidden"
+            onClick={() => !isUploadingCover && document.getElementById('cover-upload')?.click()}
           >
-            {profileImage ? (
+            {coverImage ? (
               <>
-                <img src={profileImage} alt="Profile" className="w-full h-full object-cover rounded-2xl" />
-                <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors duration-200 rounded-2xl" />
+                <img src={coverImage} alt="Cover" className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors duration-200" />
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation()
-                    setProfileImage(null)
-                    setProfileImageId(null)
+                    setCoverImage(null)
+                    setCoverImageId(null)
                   }}
-                  className="absolute top-1 right-1 w-6 h-6 bg-white/90 hover:bg-white dark:bg-gray-200/80 dark:hover:bg-gray-300/80 text-gray-700 dark:text-gray-600 rounded-full flex items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg hover:scale-110 backdrop-blur-sm border border-gray-200/50 dark:border-gray-300/50 cursor-pointer"
+                  className="absolute top-3 right-3 w-8 h-8 bg-white/90 hover:bg-white dark:bg-gray-200/80 dark:hover:bg-gray-300/80 text-gray-700 dark:text-gray-600 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110 backdrop-blur-sm cursor-pointer"
                 >
-                  <X className="w-3 h-3" />
+                  <X className="w-4 h-4" />
                 </button>
               </>
-            ) : isUploadingProfile ? (
-              <Skeleton className="w-full h-full rounded-2xl" />
+            ) : isUploadingCover ? (
+              <div className="w-full h-full flex items-center justify-center">
+                <Skeleton className="w-full h-full" />
+              </div>
             ) : (
-              <div className="flex items-center justify-center">
-                <Upload className="w-6 h-6 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-600 transition-colors" />
+              <div className="absolute top-3 right-3">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    document.getElementById('cover-upload')?.click()
+                  }}
+                  className="px-3 py-1.5 bg-gray-200/80 hover:bg-gray-300/80 dark:bg-gray-200/80 dark:hover:bg-gray-300/80 text-gray-600 dark:text-gray-600 text-sm font-medium rounded-full transition-all duration-200 shadow-sm hover:shadow-md backdrop-blur-sm border border-gray-300/50 dark:border-gray-300/50 cursor-pointer"
+                >
+                  Change Cover
+                </button>
               </div>
             )}
           </div>
-          <input
-            id="profile-upload"
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => {
-              const file = e.target.files?.[0]
-              if (file) {
-                handleImageUpload(file, 'profile')
-              }
-            }}
-          />
+          
+          {/* Profile Picture - Overlapping bottom-left */}
+          <div className="absolute -bottom-6 left-6">
+            <div 
+              className="w-20 h-20 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-300 bg-gray-50 dark:bg-gray-200 hover:bg-gray-100 dark:hover:bg-gray-300 flex items-center justify-center relative cursor-pointer transition-all duration-200 group overflow-hidden"
+              onClick={() => !isUploadingProfile && document.getElementById('profile-upload')?.click()}
+            >
+              {profileImage ? (
+                <>
+                  <img src={profileImage} alt="Profile" className="w-full h-full object-cover rounded-2xl" />
+                  <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors duration-200 rounded-2xl" />
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setProfileImage(null)
+                      setProfileImageId(null)
+                    }}
+                    className="absolute top-1 right-1 w-6 h-6 bg-white/90 hover:bg-white dark:bg-gray-200/80 dark:hover:bg-gray-300/80 text-gray-700 dark:text-gray-600 rounded-full flex items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg hover:scale-110 backdrop-blur-sm border border-gray-200/50 dark:border-gray-300/50 cursor-pointer"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </>
+              ) : isUploadingProfile ? (
+                <Skeleton className="w-full h-full rounded-2xl" />
+              ) : (
+                <div className="flex items-center justify-center">
+                  <ArrowUpIcon className="w-6 h-6 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-600 transition-colors" />
+                </div>
+              )}
+            </div>
+          </div>
         </div>
         
-        <div className="flex-1 space-y-6">
-          <Input
+        {/* Calendar Name and Description - Inside the same card */}
+        <div className="pt-8 pb-6 px-6 space-y-4">
+          <input
+            type="text"
             placeholder="Calendar Name"
             value={formData.name}
             onChange={handleNameChange}
-            className={`text-xl font-medium border-0 border-b-2 rounded-none px-0 py-3 transition-colors bg-transparent focus:outline-none focus:ring-0 ${
+            className={`w-full px-0 py-2 text-base font-medium border-0 border-b-2 rounded-none bg-transparent focus:outline-none focus:ring-0 ${
               nameError 
-                ? "border-red-400 dark:bg-red-950/30 bg-red-50/50 focus:border-red-500 dark:focus:bg-red-950/40 focus:bg-red-50/70" 
-                : "border-border/30 focus:border-primary"
+                ? "border-red-400 bg-red-50/50 dark:bg-red-950/30 focus:border-red-500" 
+                : "border-gray-300 dark:border-gray-600 focus:border-primary"
             }`}
           />
           
-          <Textarea
+          <textarea
             placeholder="Add a short description."
             value={formData.description}
             onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-            className="border-0 resize-none px-0 py-2 text-muted-foreground bg-transparent text-base focus:outline-none focus:ring-0"
-            rows={3}
+            className="w-full px-0 py-2 text-base border-0 bg-transparent focus:outline-none focus:ring-0 resize-none overflow-hidden"
+            rows={1}
           />
         </div>
       </div>
@@ -306,8 +285,8 @@ export function CreateCalendarForm() {
                     key={color}
                     type="button"
                     onClick={() => handleColorSelect(color)}
-                    className={`w-10 h-10 rounded-full transition-all ${
-                      formData.color === color 
+                    className={`w-8 h-8 rounded-full transition-all cursor-pointer ${
+                      formData.color === color
                         ? "ring-3 ring-offset-2 ring-primary scale-110" 
                         : "hover:scale-105"
                     }`}
@@ -339,7 +318,7 @@ export function CreateCalendarForm() {
             <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg">
               <span className="text-base text-muted-foreground font-mono">rlly.live/</span>
               <Input
-                placeholder="custom-url"
+                placeholder=""
                 value={formData.publicUrl}
                 onChange={(e) => setFormData(prev => ({ ...prev, publicUrl: e.target.value }))}
                 className="flex-1 bg-transparent border-0 focus:ring-0 text-base"
@@ -351,14 +330,39 @@ export function CreateCalendarForm() {
 
       {/* Create Button */}
       <div className="flex justify-start pt-4">
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
           disabled={isSubmitting}
           className="bg-foreground text-background hover:bg-foreground/90 px-12 py-3 text-base font-medium"
         >
           {isSubmitting ? "Creating..." : "Create Calendar"}
         </Button>
       </div>
+
+      <input
+        id="cover-upload"
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0]
+          if (file) {
+            handleImageUpload(file, 'cover')
+          }
+        }}
+      />
+      <input
+        id="profile-upload"
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0]
+          if (file) {
+            handleImageUpload(file, 'profile')
+          }
+        }}
+      />
     </form>
   )
 }
