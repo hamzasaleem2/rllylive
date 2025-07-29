@@ -38,8 +38,8 @@ export function CalendarSelector({ selectedCalendarId, onCalendarChange }: Calen
           <AvatarImage src={selectedCalendar?.profileImage} />
           <AvatarFallback />
         </Avatar>
-        <span className="font-medium">
-          {selectedCalendar?.name}
+        <span className="font-medium text-sm">
+          {selectedCalendar?.name || "Select a calendar"}
         </span>
         <ChevronDown className="w-4 h-4" />
       </DropdownMenuTrigger>
