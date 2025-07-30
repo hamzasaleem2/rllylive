@@ -27,7 +27,7 @@ export default function EventsPage() {
     return (
       <div className="relative">
         {/* Timeline line connecting all dots */}
-        <div className="hidden md:block absolute left-[168px] top-2 bottom-0 w-0.5 border-l border-dashed border-border"></div>
+        <div className="absolute left-3 md:left-[163.5px] top-2 bottom-0 w-0.5 border-l border-dashed border-border"></div>
         
         <div className="space-y-10">
           {[...Array(5)].map((_, groupIndex) => (
@@ -39,7 +39,7 @@ export default function EventsPage() {
               </div>
               
               {/* Timeline dot */}
-              <div className="absolute left-[10px] md:relative md:left-auto flex items-center justify-center w-2 h-2 bg-border rounded-full ring-4 ring-background flex-shrink-0 mt-2 z-10"></div>
+              <div className="absolute left-[9px] md:relative md:left-auto flex items-center justify-center w-2 h-2 bg-border rounded-full ring-4 ring-background flex-shrink-0 mt-2 z-10"></div>
               
               {/* Card section */}
               <div className="flex-1 space-y-4">
@@ -128,7 +128,7 @@ export default function EventsPage() {
               </div>
               
               {/* Timeline dot */}
-              <div className="absolute left-[10px] md:relative md:left-auto flex items-center justify-center w-2 h-2 bg-border rounded-full ring-4 ring-background flex-shrink-0 mt-2 z-10"></div>
+              <div className="absolute left-[9px] md:relative md:left-auto flex items-center justify-center w-2 h-2 bg-border rounded-full ring-4 ring-background flex-shrink-0 mt-2 z-10"></div>
               
               {/* Card section */}
               <div className="flex-1 space-y-4">

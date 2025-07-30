@@ -35,7 +35,7 @@ export function EventCardSkeleton() {
         
         {/* Event image */}
         <div className="flex-shrink-0 self-start">
-          <Skeleton className="w-40 h-40 rounded-lg" />
+          <Skeleton className="w-20 h-20 md:w-40 md:h-40 rounded-lg" />
         </div>
       </div>
     </div>
