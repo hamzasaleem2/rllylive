@@ -31,15 +31,15 @@ export default function EventsPage() {
         
         <div className="space-y-10">
           {[...Array(5)].map((_, groupIndex) => (
-            <div key={groupIndex} className="flex flex-col md:flex-row md:items-start gap-4 md:gap-8">
+            <div key={groupIndex} className="flex flex-col md:flex-row md:items-start gap-4 md:gap-8 pl-12 md:pl-0">
               {/* Date section */}
               <div className="md:w-32 flex-shrink-0">
                 <Skeleton className="h-6 w-12 mb-1" />
                 <Skeleton className="h-4 w-16" />
               </div>
               
-              {/* Timeline dot - only on desktop */}
-              <div className="hidden md:flex items-center justify-center w-2 h-2 bg-border rounded-full ring-4 ring-background flex-shrink-0 mt-2 relative z-10"></div>
+              {/* Timeline dot */}
+              <div className="absolute left-[10px] md:relative md:left-auto flex items-center justify-center w-2 h-2 bg-border rounded-full ring-4 ring-background flex-shrink-0 mt-2 z-10"></div>
               
               {/* Card section */}
               <div className="flex-1 space-y-4">
@@ -112,11 +112,11 @@ export default function EventsPage() {
     return (
       <div className="relative">
         {/* Timeline line connecting all dots */}
-        <div className="hidden md:block absolute left-[163.5px] top-2 bottom-0 w-0.5 border-l border-dashed border-border"></div>
+        <div className="absolute left-3 md:left-[163.5px] top-2 bottom-0 w-0.5 border-l border-dashed border-border"></div>
         
         <div className="space-y-10">
           {groupedEvents.map(([dateString, dayEvents]) => (
-            <div key={dateString} className="flex flex-col md:flex-row md:items-start gap-4 md:gap-8">
+            <div key={dateString} className="flex flex-col md:flex-row md:items-start gap-4 md:gap-8 pl-12 md:pl-0">
               {/* Date section */}
               <div className="md:w-32 flex-shrink-0">
                 <div className="text-lg font-semibold text-foreground">
@@ -127,8 +127,8 @@ export default function EventsPage() {
                 </div>
               </div>
               
-              {/* Timeline dot - only on desktop */}
-              <div className="hidden md:flex items-center justify-center w-2 h-2 bg-border rounded-full ring-4 ring-background flex-shrink-0 mt-2 relative z-10"></div>
+              {/* Timeline dot */}
+              <div className="absolute left-[10px] md:relative md:left-auto flex items-center justify-center w-2 h-2 bg-border rounded-full ring-4 ring-background flex-shrink-0 mt-2 z-10"></div>
               
               {/* Card section */}
               <div className="flex-1 space-y-4">
