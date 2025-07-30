@@ -77,15 +77,18 @@ export function DateTimeSelector({
 
   const handleDateSelect = (date: Date | undefined, isStart: boolean) => {
     if (date) {
-      const isoString = date.toISOString().split('T')[0]
-      if (isoString) {
-        if (isStart) {
-          onStartDateChange(isoString)
-          setStartDateOpen(false)
-        } else {
-          onEndDateChange(isoString)
-          setEndDateOpen(false)
-        }
+      // Use local date formatting to avoid timezone conversion issues
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      const localDateString = `${year}-${month}-${day}`
+      
+      if (isStart) {
+        onStartDateChange(localDateString)
+        setStartDateOpen(false)
+      } else {
+        onEndDateChange(localDateString)
+        setEndDateOpen(false)
       }
     }
   }
