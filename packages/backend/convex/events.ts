@@ -112,6 +112,142 @@ export const getCalendarEvents = query({
   },
 })
 
+// Get upcoming events for a user
+export const getUserUpcomingEvents = query({
+  handler: async (ctx) => {
+    const user = await betterAuthComponent.getAuthUser(ctx)
+    if (!user) {
+      return []
+    }
+
+    const now = Date.now()
+
+    // Get user's calendars
+    const calendars = await ctx.db
+      .query("calendars")
+      .withIndex("by_owner", (q) => q.eq("ownerId", user.userId))
+      .collect()
+
+    const calendarIds = calendars.map(c => c._id)
+    
+    // Get upcoming events from user's calendars
+    const events = await ctx.db
+      .query("events")
+      .collect()
+      
+    const upcomingEvents = events.filter(event => 
+      calendarIds.includes(event.calendarId) && event.endTime > now
+    )
+
+    // Enrich events with calendar info
+    const enrichedEvents = await Promise.all(
+      upcomingEvents.map(async (event) => {
+        const calendar = calendars.find(c => c._id === event.calendarId)
+        return {
+          ...event,
+          calendar: calendar ? {
+            _id: calendar._id,
+            name: calendar.name,
+            color: calendar.color,
+          } : null,
+        }
+      })
+    )
+
+    return enrichedEvents.sort((a, b) => a.startTime - b.startTime)
+  },
+})
+
+// Get past events for a user
+export const getUserPastEvents = query({
+  handler: async (ctx) => {
+    const user = await betterAuthComponent.getAuthUser(ctx)
+    if (!user) {
+      return []
+    }
+
+    const now = Date.now()
+
+    // Get user's calendars
+    const calendars = await ctx.db
+      .query("calendars")
+      .withIndex("by_owner", (q) => q.eq("ownerId", user.userId))
+      .collect()
+
+    const calendarIds = calendars.map(c => c._id)
+    
+    // Get past events from user's calendars
+    const events = await ctx.db
+      .query("events")
+      .collect()
+      
+    const pastEvents = events.filter(event => 
+      calendarIds.includes(event.calendarId) && event.endTime <= now
+    )
+
+    // Enrich events with calendar info
+    const enrichedEvents = await Promise.all(
+      pastEvents.map(async (event) => {
+        const calendar = calendars.find(c => c._id === event.calendarId)
+        return {
+          ...event,
+          calendar: calendar ? {
+            _id: calendar._id,
+            name: calendar.name,
+            color: calendar.color,
+          } : null,
+        }
+      })
+    )
+
+    return enrichedEvents.sort((a, b) => b.startTime - a.startTime) // Most recent first
+  },
+})
+
+// Get all events for a user (for backwards compatibility)
+export const getUserEvents = query({
+  handler: async (ctx) => {
+    const user = await betterAuthComponent.getAuthUser(ctx)
+    if (!user) {
+      return []
+    }
+
+    // Get user's calendars
+    const calendars = await ctx.db
+      .query("calendars")
+      .withIndex("by_owner", (q) => q.eq("ownerId", user.userId))
+      .collect()
+
+    const calendarIds = calendars.map(c => c._id)
+    
+    // Get all events from user's calendars
+    const events = await ctx.db
+      .query("events")
+      .collect()
+      
+    const userEvents = events.filter(event => 
+      calendarIds.includes(event.calendarId)
+    )
+
+    // Enrich events with calendar info
+    const enrichedEvents = await Promise.all(
+      userEvents.map(async (event) => {
+        const calendar = calendars.find(c => c._id === event.calendarId)
+        return {
+          ...event,
+          calendar: calendar ? {
+            _id: calendar._id,
+            name: calendar.name,
+            color: calendar.color,
+          } : null,
+        }
+      })
+    )
+
+    return enrichedEvents.sort((a, b) => a.startTime - b.startTime)
+  },
+})
+
 // Get event by ID
 export const getEvent = query({
   args: { eventId: v.id("events") },
