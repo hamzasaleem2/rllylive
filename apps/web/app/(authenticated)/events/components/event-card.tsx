@@ -44,8 +44,17 @@ export function EventCard({ event }: EventCardProps) {
       <div className="p-6 flex gap-6">
         {/* Event info */}
         <div className="flex-1">
-          {/* Time */}
+          {/* Time with LIVE indicator */}
           <div className="flex items-center gap-2 mb-3">
+            {isLive && (
+              <div className="flex items-center gap-1.5">
+                <div className="relative">
+                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                  <div className="absolute inset-0 w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
+                </div>
+                <span className="text-xs font-semibold text-red-500 tracking-wide">LIVE</span>
+              </div>
+            )}
             <span className="text-sm text-muted-foreground font-medium">
               {formatTime(startDate)}
             </span>
