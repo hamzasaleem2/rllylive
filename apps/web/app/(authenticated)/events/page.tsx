@@ -39,7 +39,7 @@ export default function EventsPage() {
               </div>
               
               {/* Timeline dot - only on desktop */}
-              <div className="hidden md:flex items-center justify-center w-3 h-3 bg-muted-foreground rounded-full ring-4 ring-background flex-shrink-0 mt-2 relative z-10"></div>
+              <div className="hidden md:flex items-center justify-center w-2 h-2 bg-border rounded-full ring-4 ring-background flex-shrink-0 mt-2 relative z-10"></div>
               
               {/* Card section */}
               <div className="flex-1 space-y-4">
@@ -112,7 +112,7 @@ export default function EventsPage() {
     return (
       <div className="relative">
         {/* Timeline line connecting all dots */}
-        <div className="hidden md:block absolute left-[165px] top-2 bottom-0 w-0.5 border-l border-dashed border-border"></div>
+        <div className="hidden md:block absolute left-[163.5px] top-2 bottom-0 w-0.5 border-l border-dashed border-border"></div>
         
         <div className="space-y-10">
           {groupedEvents.map(([dateString, dayEvents]) => (
@@ -128,7 +128,7 @@ export default function EventsPage() {
               </div>
               
               {/* Timeline dot - only on desktop */}
-              <div className="hidden md:flex items-center justify-center w-3 h-3 bg-muted-foreground rounded-full ring-4 ring-background flex-shrink-0 mt-2 relative z-10"></div>
+              <div className="hidden md:flex items-center justify-center w-2 h-2 bg-border rounded-full ring-4 ring-background flex-shrink-0 mt-2 relative z-10"></div>
               
               {/* Card section */}
               <div className="flex-1 space-y-4">

@@ -112,7 +112,7 @@ export function EventCard({ event }: EventCardProps) {
           <div className="flex items-center justify-between mt-4">
             <div className="flex items-center gap-2">
               {isLive && (
-                <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
+                <Badge className="bg-blue-700 text-white hover:bg-blue-700 border-0 font-medium px-3 py-1">
                   Invited
                 </Badge>
               )}
