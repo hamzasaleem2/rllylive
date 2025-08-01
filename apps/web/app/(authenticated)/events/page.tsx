@@ -16,12 +16,20 @@ type EventWithCalendar = Doc<"events"> & {
     name: string
     color: string
   } | null
+  userStatus?: {
+    isCreator: boolean
+    isCalendarOwner: boolean
+    attendeeType: "creator" | "invited" | "registered" | null
+    rsvpStatus: "going" | "maybe" | "not_going" | null
+    invitationStatus: "pending" | "accepted" | "declined" | null
+  } | null
 }
 
 export default function EventsPage() {
   const [activeTab, setActiveTab] = useState("upcoming")
-  const upcomingEvents = useQuery(api.events.getUserUpcomingEvents)
-  const pastEvents = useQuery(api.events.getUserPastEvents)
+  const allEvents = useQuery(api.events.getAllUserEvents)
+  const upcomingEvents = allEvents?.upcoming
+  const pastEvents = allEvents?.past
 
   const renderSkeletonTimeline = () => {
     return (
@@ -52,7 +60,7 @@ export default function EventsPage() {
     )
   }
 
-  if (upcomingEvents === undefined || pastEvents === undefined) {
+  if (allEvents === undefined) {
     return (
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <PageLayout 

@@ -1,5 +1,6 @@
 "use client"
 
+import './description-preview.css'
 import { useState } from "react"
 import { Button } from "@workspace/ui/components/button"
 import { 
@@ -7,8 +8,9 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@workspace/ui/components/dialog"
-import { Textarea } from "@workspace/ui/components/textarea"
+import { TiptapEditor } from "@/components/tiptap-editor"
 import { 
   FileText,
   Plus
@@ -33,21 +35,28 @@ export function DescriptionEditor({ description, onDescriptionChange }: Descript
     setOpen(false)
   }
 
-  const hasDescription = description && description.trim() !== ''
+  const stripHtml = (html: string) => {
+    return html.replace(/<[^>]*>/g, '').replace(/&[^;]+;/g, ' ')
+  }
+
+  const hasDescription = description && stripHtml(description).trim() !== ''
 
   return (
     <>
       {hasDescription ? (
         <div 
-          className="border rounded-lg p-4 bg-muted/20 cursor-pointer hover:bg-muted/30 transition-colors"
+          className="border rounded-lg bg-muted/20 cursor-pointer hover:bg-muted/30 transition-colors"
           onClick={() => setOpen(true)}
         >
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 p-4 pb-2">
             <FileText className="w-3 h-3" />
             <span className="text-xs font-medium">Event Description</span>
           </div>
-          <div className="text-xs text-muted-foreground truncate">
-            {description.replace(/\n/g, ' ')}
+          <div className="px-4 pb-4">
+            <div 
+              className="description-preview max-h-32 overflow-y-auto"
+              dangerouslySetInnerHTML={{ __html: description }}
+            />
           </div>
         </div>
       ) : (
@@ -69,23 +78,24 @@ export function DescriptionEditor({ description, onDescriptionChange }: Descript
         }
         setOpen(isOpen)
       }}>
-        <DialogContent className="max-w-2xl max-h-[80vh] p-0">
-          <DialogHeader className="px-6 py-4 border-b">
+        <DialogContent className="max-w-3xl max-h-[80vh] p-0 flex flex-col">
+          <DialogHeader className="px-6 py-4 border-b flex-shrink-0">
             <DialogTitle>Event Description</DialogTitle>
+            <DialogDescription>
+              Use rich text formatting to create an engaging description for your event
+            </DialogDescription>
           </DialogHeader>
 
-          <div className="flex-1 overflow-hidden">
-            <div className="p-6">
-              <Textarea
-                placeholder="Who should come? What's the event about?"
-                value={localDescription}
-                onChange={(e) => setLocalDescription(e.target.value)}
-                className="h-[200px] resize-none focus:outline-none focus:ring-0 focus:border-primary overflow-y-auto"
-              />
-            </div>
+          <div className="flex-1 overflow-hidden p-6">
+            <TiptapEditor
+              content={localDescription}
+              onChange={setLocalDescription}
+              placeholder=""
+              className="h-full max-h-[50vh] overflow-hidden"
+            />
           </div>
 
-          <div className="flex items-center justify-end px-6 py-4 border-t bg-muted/20">
+          <div className="flex items-center justify-end px-6 py-4 border-t bg-muted/20 flex-shrink-0">
             <Button onClick={handleDone} className="cursor-pointer">
               Done
             </Button>

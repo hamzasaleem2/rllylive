@@ -76,4 +76,74 @@ export default defineSchema({
   })
   .index("by_user", ["userId"])
   .index("by_user_category", ["userId", "category"]),
+
+  eventInvitations: defineTable({
+    eventId: v.id("events"),
+    invitedUserId: v.id("users"),
+    invitedBy: v.id("users"), // Who sent the invitation
+    status: v.union(v.literal("pending"), v.literal("accepted"), v.literal("declined")),
+    invitedAt: v.number(), // Unix timestamp
+    respondedAt: v.optional(v.number()), // Unix timestamp when user responded
+    message: v.optional(v.string()), // Optional invitation message
+  })
+  .index("by_event", ["eventId"])
+  .index("by_invited_user", ["invitedUserId"])
+  .index("by_inviter", ["invitedBy"])
+  .index("by_event_user", ["eventId", "invitedUserId"])
+  .index("by_status", ["status"]),
+
+  eventRSVPs: defineTable({
+    eventId: v.id("events"),
+    userId: v.id("users"),
+    status: v.union(v.literal("going"), v.literal("maybe"), v.literal("not_going")),
+    rsvpAt: v.number(), // Unix timestamp
+    // Optional fields for additional info
+    guestCount: v.optional(v.number()), // Number of additional guests
+    dietaryRestrictions: v.optional(v.string()),
+    notes: v.optional(v.string()),
+  })
+  .index("by_event", ["eventId"])
+  .index("by_user", ["userId"])
+  .index("by_event_user", ["eventId", "userId"])
+  .index("by_status", ["status"])
+  .index("by_event_status", ["eventId", "status"]),
+
+  eventAttendees: defineTable({
+    eventId: v.id("events"),
+    userId: v.id("users"),
+    // How they became an attendee
+    attendeeType: v.union(
+      v.literal("creator"), // Event creator
+      v.literal("invited"), // Invited by someone
+      v.literal("registered") // Self-registered (for public events)
+    ),
+    registeredAt: v.number(), // Unix timestamp
+    checkedIn: v.optional(v.boolean()), // Whether they've checked into the event
+    checkedInAt: v.optional(v.number()), // When they checked in
+  })
+  .index("by_event", ["eventId"])
+  .index("by_user", ["userId"])
+  .index("by_event_user", ["eventId", "userId"])
+  .index("by_attendee_type", ["attendeeType"])
+  .index("by_event_type", ["eventId", "attendeeType"]),
+
+  eventReports: defineTable({
+    eventId: v.id("events"),
+    reportedBy: v.id("users"), // User who reported the event
+    reason: v.string(), // Reason for reporting
+    reportedAt: v.number(), // Unix timestamp when reported
+    status: v.union(
+      v.literal("pending"), // Report submitted, awaiting review
+      v.literal("under_review"), // Being reviewed by moderators
+      v.literal("resolved"), // Issue resolved
+      v.literal("dismissed") // Report dismissed as invalid
+    ),
+    reviewedBy: v.optional(v.id("users")), // Moderator who reviewed
+    reviewedAt: v.optional(v.number()), // When it was reviewed
+    reviewNotes: v.optional(v.string()), // Internal notes from moderators
+  })
+  .index("by_event", ["eventId"])
+  .index("by_reporter", ["reportedBy"])
+  .index("by_status", ["status"])
+  .index("by_event_reporter", ["eventId", "reportedBy"]),
 });

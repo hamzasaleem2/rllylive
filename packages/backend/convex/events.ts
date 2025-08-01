@@ -95,6 +95,14 @@ export const createEvent = mutation({
       createdById: user.userId as any,
     })
 
+    // Add the creator as an attendee
+    await ctx.db.insert("eventAttendees", {
+      eventId: eventId,
+      userId: user.userId as any,
+      attendeeType: "creator",
+      registeredAt: Date.now(),
+    })
+
     return { eventId }
   },
 })
@@ -248,10 +256,12 @@ export const getUserEvents = query({
   },
 })
 
-// Get event by ID
+// Get event by ID with full details
 export const getEvent = query({
   args: { eventId: v.id("events") },
   handler: async (ctx, { eventId }) => {
+    const user = await betterAuthComponent.getAuthUser(ctx)
+    
     const event = await ctx.db.get(eventId)
     if (!event) {
       return null
@@ -260,13 +270,278 @@ export const getEvent = query({
     // Get calendar info
     const calendar = await ctx.db.get(event.calendarId)
     
+    // Get event creator details
+    const createdBy = await ctx.db.get(event.createdById)
+    
+    // Get calendar owner details (if different from creator)
+    let calendarOwner = null
+    if (calendar && calendar.ownerId !== event.createdById) {
+      calendarOwner = await ctx.db.get(calendar.ownerId)
+    }
+    
+    // Get attendee count
+    const attendeeCount = await ctx.db
+      .query("eventAttendees")
+      .withIndex("by_event", (q) => q.eq("eventId", eventId))
+      .collect()
+      .then(attendees => attendees.length)
+
+    // Get RSVP summary
+    const rsvps = await ctx.db
+      .query("eventRSVPs")
+      .withIndex("by_event", (q) => q.eq("eventId", eventId))
+      .collect()
+
+    const rsvpSummary = {
+      going: 0,
+      maybe: 0,
+      not_going: 0,
+      totalGuests: 0,
+    }
+
+    rsvps.forEach((rsvp) => {
+      rsvpSummary[rsvp.status] += 1
+      if (rsvp.status === "going") {
+        rsvpSummary.totalGuests += 1 + (rsvp.guestCount || 0)
+      }
+    })
+
+    // Get user's relationship to this event (if logged in)
+    let userStatus = null
+    if (user) {
+      // Check if user is invited
+      const invitation = await ctx.db
+        .query("eventInvitations")
+        .withIndex("by_event_user", (q) => 
+          q.eq("eventId", eventId).eq("invitedUserId", user.userId)
+        )
+        .first()
+
+      // Check if user is an attendee
+      const attendee = await ctx.db
+        .query("eventAttendees")
+        .withIndex("by_event_user", (q) => 
+          q.eq("eventId", eventId).eq("userId", user.userId)
+        )
+        .first()
+
+      // Check user's RSVP
+      const userRSVP = await ctx.db
+        .query("eventRSVPs")
+        .withIndex("by_event_user", (q) => 
+          q.eq("eventId", eventId).eq("userId", user.userId)
+        )
+        .first()
+
+      userStatus = {
+        isCreator: event.createdById === user.userId,
+        isCalendarOwner: calendar?.ownerId === user.userId,
+        invitation: invitation ? {
+          status: invitation.status,
+          invitedAt: invitation.invitedAt,
+          invitedBy: invitation.invitedBy,
+        } : null,
+        isAttendee: !!attendee,
+        attendeeType: attendee?.attendeeType || null,
+        rsvp: userRSVP ? {
+          status: userRSVP.status,
+          guestCount: userRSVP.guestCount,
+          rsvpAt: userRSVP.rsvpAt,
+        } : null,
+      }
+    }
+    
     return {
       ...event,
       calendar: calendar ? {
         _id: calendar._id,
         name: calendar.name,
+        description: calendar.description,
         color: calendar.color,
+        profileImage: calendar.profileImage,
+        ownerId: calendar.ownerId,
+        owner: calendarOwner ? {
+          userId: calendarOwner._id,
+          name: calendarOwner.name,
+          username: calendarOwner.username,
+          rllyId: calendarOwner.rllyId,
+          image: calendarOwner.image,
+          website: calendarOwner.website,
+          twitter: calendarOwner.twitter,
+          instagram: calendarOwner.instagram,
+        } : null,
       } : null,
+      createdBy: createdBy ? {
+        userId: createdBy._id,
+        name: createdBy.name,
+        username: createdBy.username,
+        rllyId: createdBy.rllyId,
+        image: createdBy.image,
+        website: createdBy.website,
+        twitter: createdBy.twitter,
+        instagram: createdBy.instagram,
+      } : null,
+      attendeeCount,
+      rsvpSummary,
+      userStatus,
     }
+  },
+})
+
+// Get events user is invited to
+export const getUserInvitedEvents = query({
+  handler: async (ctx) => {
+    const user = await betterAuthComponent.getAuthUser(ctx)
+    if (!user) {
+      return []
+    }
+
+    const now = Date.now()
+
+    // Get pending invitations
+    const invitations = await ctx.db
+      .query("eventInvitations")
+      .withIndex("by_invited_user", (q) => q.eq("invitedUserId", user.userId))
+      .filter((q) => q.eq(q.field("status"), "pending"))
+      .collect()
+
+    // Get the events for these invitations
+    const invitedEvents = await Promise.all(
+      invitations.map(async (invitation) => {
+        const event = await ctx.db.get(invitation.eventId)
+        if (!event || event.endTime <= now) return null // Skip past events
+
+        const calendar = await ctx.db.get(event.calendarId)
+        const inviter = await ctx.db.get(invitation.invitedBy)
+
+        return {
+          ...event,
+          calendar: calendar ? {
+            _id: calendar._id,
+            name: calendar.name,
+            color: calendar.color,
+          } : null,
+          invitation: {
+            _id: invitation._id,
+            status: invitation.status,
+            invitedAt: invitation.invitedAt,
+            message: invitation.message,
+            inviter: inviter ? {
+              _id: inviter._id,
+              name: inviter.name,
+              username: inviter.username,
+              image: inviter.image,
+            } : null,
+          },
+        }
+      })
+    )
+
+    return invitedEvents.filter(event => event !== null).sort((a, b) => a.startTime - b.startTime)
+  },
+})
+
+// Get all events for user (owned + invited + attending)
+export const getAllUserEvents = query({
+  handler: async (ctx) => {
+    const user = await betterAuthComponent.getAuthUser(ctx)
+    if (!user) {
+      return {
+        upcoming: [],
+        past: [],
+      }
+    }
+
+    const now = Date.now()
+
+    // Get user's calendars (owned events)
+    const calendars = await ctx.db
+      .query("calendars")
+      .withIndex("by_owner", (q) => q.eq("ownerId", user.userId))
+      .collect()
+
+    const calendarIds = calendars.map(c => c._id)
+    
+    // Get all events from user's calendars
+    const ownedEvents = await ctx.db
+      .query("events")
+      .collect()
+      .then(events => events.filter(event => calendarIds.includes(event.calendarId)))
+
+    // Get events user is attending (but doesn't own)
+    const attendeeRecords = await ctx.db
+      .query("eventAttendees")
+      .withIndex("by_user", (q) => q.eq("userId", user.userId))
+      .collect()
+
+    const attendingEventIds = attendeeRecords
+      .filter(record => record.attendeeType !== "creator")
+      .map(record => record.eventId)
+
+    const attendingEvents = await Promise.all(
+      attendingEventIds.map(eventId => ctx.db.get(eventId))
+    ).then(events => events.filter(event => event !== null))
+
+    // Combine and deduplicate events
+    const allEventIds = new Set()
+    const combinedEvents = []
+
+    for (const event of [...ownedEvents, ...attendingEvents]) {
+      if (!allEventIds.has(event._id)) {
+        allEventIds.add(event._id)
+        combinedEvents.push(event)
+      }
+    }
+
+    // Enrich events with calendar info and user status
+    const enrichedEvents = await Promise.all(
+      combinedEvents.map(async (event) => {
+        const calendar = calendars.find(c => c._id === event.calendarId) || 
+                         await ctx.db.get(event.calendarId)
+
+        // Get user's status for this event
+        const attendee = attendeeRecords.find(a => a.eventId === event._id)
+        const userRSVP = await ctx.db
+          .query("eventRSVPs")
+          .withIndex("by_event_user", (q) => 
+            q.eq("eventId", event._id).eq("userId", user.userId)
+          )
+          .first()
+
+        const invitation = await ctx.db
+          .query("eventInvitations")
+          .withIndex("by_event_user", (q) => 
+            q.eq("eventId", event._id).eq("invitedUserId", user.userId)
+          )
+          .first()
+
+        return {
+          ...event,
+          calendar: calendar ? {
+            _id: calendar._id,
+            name: calendar.name,
+            color: calendar.color,
+          } : null,
+          userStatus: {
+            isCreator: event.createdById === user.userId,
+            isCalendarOwner: calendar?.ownerId === user.userId,
+            attendeeType: attendee?.attendeeType || null,
+            rsvpStatus: userRSVP?.status || null,
+            invitationStatus: invitation?.status || null,
+          },
+        }
+      })
+    )
+
+    // Split into upcoming and past
+    const upcoming = enrichedEvents
+      .filter(event => event.endTime > now)
+      .sort((a, b) => a.startTime - b.startTime)
+
+    const past = enrichedEvents
+      .filter(event => event.endTime <= now)
+      .sort((a, b) => b.startTime - a.startTime)
+
+    return { upcoming, past }
   },
 })
