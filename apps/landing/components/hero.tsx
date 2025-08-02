@@ -39,12 +39,11 @@ export function Hero() {
                 </div>
                 
                 <span className="font-serif text-sm italic tracking-wide">
-                  Powered by Convex & Resend for the hackathon
+                  Powered by Convex & Resend
                 </span>
                 
                 <div className="flex items-center space-x-1">
                   <div className="w-1 h-1 bg-live-green rounded-full animate-pulse"></div>
-                  <span className="text-xs opacity-60 group-hover:opacity-100 transition-opacity">→</span>
                 </div>
                 
                 {/* Resend light effect - diffused blast traveling to arrow */}
