@@ -1,11 +1,26 @@
 "use client"
 
-import { Button } from "@workspace/ui/components/button"
 import { IconScene } from "./icon-scene"
 
 export function Hero() {
   return (
     <section className="flex-1 bg-background subtle-grid">
+      <style jsx>{`
+        @keyframes pulse-alternate-1 {
+          0%, 40% { opacity: 1; }
+          60%, 100% { opacity: 0.2; }
+        }
+        @keyframes pulse-alternate-2 {
+          0%, 40% { opacity: 0.2; }
+          60%, 100% { opacity: 1; }
+        }
+        .pulse-alt-1 {
+          animation: pulse-alternate-1 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        .pulse-alt-2 {
+          animation: pulse-alternate-2 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+      `}</style>
       <div className="flex flex-col lg:flex-row h-full">
         {/* Left Side - Branding */}
         <div className="flex-1 flex items-center justify-center px-6 sm:px-8 lg:pl-16 lg:pr-8 py-20 sm:py-24 lg:py-0">
@@ -43,7 +58,7 @@ export function Hero() {
                 </span>
                 
                 <div className="flex items-center space-x-1">
-                  <div className="w-1 h-1 bg-live-green rounded-full animate-pulse"></div>
+                  <div className="w-1 h-1 bg-live-green rounded-full pulse-alt-1"></div>
                 </div>
                 
                 {/* Resend light effect - diffused blast traveling to arrow */}
@@ -65,17 +80,26 @@ export function Hero() {
               Just real people, real events, <span className="font-medium text-foreground">really simple</span>.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start space-y-3 sm:space-y-0 sm:space-x-3 mb-8">
-              <Button size="lg" className="font-medium">
-                Start Planning Events
-              </Button>
-              <Button variant="outline" size="lg" className="font-medium">
-                See How It Works
-              </Button>
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start space-y-3 sm:space-y-0 sm:space-x-4 mb-8">
+              <button className="group relative px-8 py-4 bg-foreground text-background font-medium text-lg rounded-xl hover:bg-foreground/90 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl cursor-pointer">
+                <span className="relative z-10">Start Planning Events</span>
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-foreground via-foreground to-foreground/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              </button>
+              
+              <button className="group relative px-8 py-4 bg-transparent border-2 border-border/40 hover:border-foreground/60 text-foreground font-medium text-lg rounded-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] hover:bg-muted/30 cursor-pointer">
+                <span className="flex items-center space-x-2">
+                  <span>See How It Works</span>
+                  <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </span>
+              </button>
             </div>
 
             <div className="flex items-center justify-center lg:justify-start space-x-3 text-sm text-muted-foreground font-sans font-medium">
-              <div className="w-2 h-2 bg-live-green rounded-full pulse-green"></div>
+              <div className="flex items-center space-x-1">
+                <div className="w-2 h-2 bg-live-green rounded-full pulse-alt-2"></div>
+              </div>
               <span className="tracking-wide">Live updates • Real-time RSVPs • Actually works</span>
             </div>
           </div>
