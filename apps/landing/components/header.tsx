@@ -40,7 +40,7 @@ export function Header() {
               {timeDisplay}
             </div>
             <ThemeToggle />
-            <Button variant="dark" size="xs" className="cursor-pointer">
+            <Button variant="dark" size="sm" className="font-medium">
               Sign In
             </Button>
           </div>

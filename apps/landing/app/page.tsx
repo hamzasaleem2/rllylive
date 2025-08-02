@@ -4,7 +4,7 @@ import { Footer } from "@/components/footer"
 
 export default function Page() {
   return (
-    <main className="h-screen flex flex-col">
+    <main className="min-h-screen flex flex-col">
       <Header />
       <Hero />
       <Footer />
