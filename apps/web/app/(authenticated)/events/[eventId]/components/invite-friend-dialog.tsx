@@ -49,25 +49,45 @@ export function InviteFriendDialog({
     setIsSubmitting(true)
     
     try {
-      // For now, we'll just copy the invite link and show a success message
-      // In the future, this could send an actual email invitation
       const inviteLink = `${window.location.origin}/events/${eventId}`
+      let inviteText = `Hi! I thought you'd be interested in this event: ${eventName}\n\n`
       
-      // Copy to clipboard
-      await navigator.clipboard.writeText(inviteLink)
+      if (message.trim()) {
+        inviteText += `${message}\n\n`
+      }
       
-      toast.success(`Invite link copied to clipboard! Share it with ${email}`)
+      inviteText += `Check it out here: ${inviteLink}`
+      
+      // Copy the full invite message to clipboard
+      await navigator.clipboard.writeText(inviteText)
+      
+      toast.success(`Invite message copied to clipboard! You can now paste it in your message to ${email}`)
       
       // Reset form and close dialog
       setEmail("")
       setMessage("")
       onOpenChange(false)
     } catch (error) {
-      console.error("Failed to copy invite link:", error)
+      console.error("Failed to copy invite:", error)
       toast.error("Failed to create invite. Please try again.")
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  const shareViaEmail = () => {
+    const inviteLink = `${window.location.origin}/events/${eventId}`
+    let body = `Hi!\n\nI thought you'd be interested in this event: ${eventName}\n\n`
+    
+    if (message.trim()) {
+      body += `${message}\n\n`
+    }
+    
+    body += `Check it out here: ${inviteLink}`
+    
+    const subject = `Invitation: ${eventName}`
+    const mailto = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    window.open(mailto)
   }
 
   const handleCancel = () => {
@@ -85,7 +105,7 @@ export function InviteFriendDialog({
             Invite a Friend
           </DialogTitle>
           <DialogDescription>
-            Invite someone to {eventName}. We'll copy the event link to your clipboard so you can share it with them.
+            Invite someone to {eventName}. We'll copy the event link so you can share it directly with them.
           </DialogDescription>
         </DialogHeader>
 
@@ -119,7 +139,7 @@ export function InviteFriendDialog({
           </div>
         </div>
 
-        <div className="flex gap-3 justify-end mt-6">
+        <div className="flex gap-2 justify-end mt-6">
           <Button 
             variant="outline" 
             onClick={handleCancel}
@@ -128,10 +148,18 @@ export function InviteFriendDialog({
             Cancel
           </Button>
           <Button 
+            variant="outline"
+            onClick={shareViaEmail}
+            disabled={isSubmitting || !email.trim()}
+          >
+            <Mail className="w-4 h-4 mr-2" />
+            Open Email
+          </Button>
+          <Button 
             onClick={handleInvite}
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Creating Invite..." : "Copy Invite Link"}
+            {isSubmitting ? "Creating..." : "Copy Message"}
           </Button>
         </div>
       </DialogContent>

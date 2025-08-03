@@ -1,6 +1,7 @@
 "use client"
 
 import { useQuery } from "convex/react"
+import { useRouter } from "next/navigation"
 import { api } from "@workspace/backend/convex/_generated/api.js"
 import { Card, CardContent } from "@workspace/ui/components/card"
 import { OptimizedAvatar } from "@/components/optimized-avatar"
@@ -20,8 +21,17 @@ type CalendarWithSubscriberCount = {
 }
 
 function CalendarCard({ calendar }: { calendar: CalendarWithSubscriberCount }) {
+  const router = useRouter()
+
+  const handleClick = () => {
+    router.push(`/calendars/${calendar._id}`)
+  }
+
   return (
-    <Card className="bg-card/50 backdrop-blur-sm border border-border/50 hover:border-border/80 transition-all duration-200 cursor-pointer group overflow-hidden">
+    <Card 
+      className="bg-card/50 backdrop-blur-sm border border-border/50 hover:border-border/80 transition-all duration-200 cursor-pointer group overflow-hidden"
+      onClick={handleClick}
+    >
       <CardContent className="p-4 flex flex-col items-center text-center h-32">
         <div className="mb-3">
           {calendar.profileImage ? (

@@ -30,7 +30,7 @@ export function LocationMap({ isGlobal, location, onLocationChange, onToggleChan
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   const [showResults, setShowResults] = useState(false)
   const mapRef = useRef<any>(null)
-  const searchTimeoutRef = useRef<NodeJS.Timeout>()
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const searchContainerRef = useRef<HTMLDivElement>(null)
   const isSelectingResult = useRef(false)
 
@@ -178,14 +178,14 @@ export function LocationMap({ isGlobal, location, onLocationChange, onToggleChan
         
         {/* Toggle buttons inside map */}
         <div className="absolute top-4 left-4 z-40">
-          <div className="flex rounded-lg overflow-hidden bg-gray-200/80 backdrop-blur-sm">
+          <div className="flex rounded-lg overflow-hidden bg-gray-200/80 dark:bg-black/80 backdrop-blur-sm">
             <button
               type="button"
               onClick={() => handleToggleChange(false)}
               className={`px-3 py-1.5 text-xs font-medium transition-colors ${
                 !isGlobal 
-                  ? "bg-gray-600 text-white" 
-                  : "bg-transparent text-gray-600 hover:bg-gray-300/50"
+                  ? "bg-gray-600 dark:bg-black text-white" 
+                  : "bg-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-300/50 dark:hover:bg-gray-800/50"
               }`}
             >
               City
@@ -195,8 +195,8 @@ export function LocationMap({ isGlobal, location, onLocationChange, onToggleChan
               onClick={() => handleToggleChange(true)}
               className={`px-3 py-1.5 text-xs font-medium transition-colors ${
                 isGlobal 
-                  ? "bg-gray-600 text-white" 
-                  : "bg-transparent text-gray-600 hover:bg-gray-300/50"
+                  ? "bg-gray-600 dark:bg-black text-white" 
+                  : "bg-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-300/50 dark:hover:bg-gray-800/50"
               }`}
             >
               Global
@@ -215,7 +215,7 @@ export function LocationMap({ isGlobal, location, onLocationChange, onToggleChan
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => searchResults.length > 0 && searchQuery.length > 0 && setShowResults(true)}
-                  className="pl-10 bg-white/90 dark:bg-gray-700/90 backdrop-blur-sm border border-border/50 rounded-lg focus:outline-none focus:ring-0"
+                  className="pl-10 bg-white/90 dark:bg-black/90 backdrop-blur-sm border border-border/50 rounded-lg focus:outline-none focus:ring-0 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                 />
               </div>
               

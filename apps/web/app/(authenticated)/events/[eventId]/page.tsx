@@ -3,11 +3,11 @@
 import React from "react"
 import { useQuery } from "convex/react"
 import { api } from "@workspace/backend/convex/_generated/api.js"
-import { Id } from "@workspace/backend/convex/_generated/dataModel"
 import { PageLayout } from "@/components/page-layout"
 import { EventPreview } from "./components/event-preview"
 import { EventPreviewSkeleton } from "./components/event-preview-skeleton"
 import { notFound } from "next/navigation"
+import { Id } from "@workspace/backend/convex/_generated/dataModel.js"
 
 interface EventPageProps {
   params: { eventId: string }

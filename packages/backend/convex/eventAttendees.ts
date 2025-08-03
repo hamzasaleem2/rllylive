@@ -108,7 +108,14 @@ export const getEventAttendeeCount = query({
     }
 
     attendees.forEach((attendee) => {
-      counts[attendee.attendeeType] += 1
+      if (attendee.attendeeType === "creator") {
+        counts.creators += 1
+      } else if (attendee.attendeeType === "invited") {
+        counts.invited += 1
+      } else if (attendee.attendeeType === "registered") {
+        counts.registered += 1
+      }
+      
       if (attendee.checkedIn) {
         counts.checkedIn += 1
       }

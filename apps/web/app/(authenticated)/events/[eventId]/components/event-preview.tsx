@@ -4,7 +4,7 @@ import '../../create/components/description-preview.css'
 import React, { useState } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { Calendar, Clock, MapPin, Users, Lock, Globe, CheckCircle, Timer, Video, ExternalLink, ChevronDown, ChevronUp, UserPlus } from "lucide-react"
+import { Calendar, Clock, MapPin, Users, Lock, Globe, CheckCircle, Timer, Video, ExternalLink, ChevronDown, ChevronUp, UserPlus, Share2 } from "lucide-react"
 import { Badge } from "@workspace/ui/components/badge"
 import { Button } from "@workspace/ui/components/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@workspace/ui/components/tooltip"
@@ -13,6 +13,7 @@ import { ContactHostDialog } from "./contact-host-dialog"
 import { ReportEventDialog } from "./report-event-dialog"
 import { CancelRegistrationDialog } from "./cancel-registration-dialog"
 import { InviteFriendDialog } from "./invite-friend-dialog"
+import { ShareEventDialog } from "./share-event-dialog"
 import { useQuery, useMutation } from "convex/react"
 import { api } from "@workspace/backend/convex/_generated/api.js"
 
@@ -26,6 +27,7 @@ export function EventPreview({ event }: EventPreviewProps) {
   const [reportEventOpen, setReportEventOpen] = useState(false)
   const [cancelRegistrationOpen, setCancelRegistrationOpen] = useState(false)
   const [inviteFriendOpen, setInviteFriendOpen] = useState(false)
+  const [shareEventOpen, setShareEventOpen] = useState(false)
   const [descriptionExpanded, setDescriptionExpanded] = useState(false)
   const [isJoining, setIsJoining] = useState(false)
   
@@ -674,11 +676,6 @@ export function EventPreview({ event }: EventPreviewProps) {
                       {timeUntilStart}
                     </div>
                   )}
-                  {isPast && (
-                    <div className="bg-gray-500 text-white px-2 py-0.5 rounded text-xs font-medium">
-                      Event Ended
-                    </div>
-                  )}
                 </div>
 
                 {/* Status */}
@@ -696,7 +693,11 @@ export function EventPreview({ event }: EventPreviewProps) {
                   
                   <Button variant="outline" className="flex-shrink-0" onClick={() => setInviteFriendOpen(true)}>
                     <UserPlus className="w-4 h-4 mr-2" />
-                    Invite a Friend
+                    Invite
+                  </Button>
+                  
+                  <Button variant="outline" className="flex-shrink-0" onClick={() => setShareEventOpen(true)}>
+                    <Share2 className="w-4 h-4" />
                   </Button>
                 </div>
 
@@ -749,11 +750,6 @@ export function EventPreview({ event }: EventPreviewProps) {
                           {timeUntilStart}
                         </div>
                       )}
-                      {isPast && (
-                        <div className="bg-gray-500 text-white px-2 py-0.5 rounded text-xs font-medium">
-                          Event Ended
-                        </div>
-                      )}
                     </div>
                   )}
 
@@ -772,6 +768,19 @@ export function EventPreview({ event }: EventPreviewProps) {
                         : "One-Click RSVP"
                     }
                   </Button>
+
+                  {/* Share Event Button for non-registered users */}
+                  <div className="flex justify-center pt-2">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => setShareEventOpen(true)}
+                      className="text-muted-foreground hover:text-foreground"
+                    >
+                      <Share2 className="w-4 h-4 mr-2" />
+                      Share Event
+                    </Button>
+                  </div>
                 </div>
               </>
             )}
@@ -819,6 +828,13 @@ export function EventPreview({ event }: EventPreviewProps) {
       <InviteFriendDialog
         open={inviteFriendOpen}
         onOpenChange={setInviteFriendOpen}
+        eventId={event._id}
+        eventName={event.name}
+      />
+
+      <ShareEventDialog
+        open={shareEventOpen}
+        onOpenChange={setShareEventOpen}
         eventId={event._id}
         eventName={event.name}
       />

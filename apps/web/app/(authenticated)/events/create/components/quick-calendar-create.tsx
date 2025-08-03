@@ -72,7 +72,9 @@ export function QuickCalendarCreate({ open, onOpenChange, onCalendarCreated }: Q
       })
       
       toast.success("Calendar created successfully!")
-      onCalendarCreated(result.calendarId)
+      if (result) {
+        onCalendarCreated(result.calendarId)
+      }
       onOpenChange(false)
       
       // Form will be reset automatically when dialog closes
