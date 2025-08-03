@@ -101,12 +101,6 @@ function EventCard({ event }: { event: any }) {
             {event.name || event.title}
           </h3>
 
-          {/* Description */}
-          {event.description && (
-            <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-              {event.description}
-            </p>
-          )}
 
           {/* Key Info - one per row */}
           <div className="space-y-3">
@@ -226,21 +220,20 @@ function CalendarStats({ stats }: { stats: any }) {
 export function CalendarViewClient({ identifier }: CalendarViewClientProps) {
   const router = useRouter()
   
-  // Determine if we're visiting by ID or custom URL
-  const isVisitingById = identifier.startsWith('rlly')
-  
-  // Try to get calendar by public URL (only if not visiting by ID)
-  const calendarByUrl = useQuery(api.calendars.getPublicCalendarByUrl, 
-    !isVisitingById ? { publicUrl: identifier } : "skip"
-  )
-  
-  // Try to get calendar by ID (only if visiting by ID)
+  // Try both approaches - first by ID, then by URL
+  // We'll let the backend determine validity
   const calendarById = useQuery(api.calendars.getPublicCalendar, 
-    isVisitingById ? { calendarId: identifier as any } : "skip"
+    { calendarId: identifier as any }
   )
   
-  // Use the appropriate response
-  const calendarResponse = isVisitingById ? calendarById : calendarByUrl
+  const calendarByUrl = useQuery(api.calendars.getPublicCalendarByUrl, 
+    { publicUrl: identifier }
+  )
+  
+  // Use whichever one returns a valid calendar
+  const calendarResponse = calendarById?.status === "public" || calendarById?.status === "private" 
+    ? calendarById 
+    : calendarByUrl
   const calendar = calendarResponse?.status === "public" ? calendarResponse.calendar : null
   const isPrivate = calendarResponse?.status === "private"
   
@@ -257,10 +250,11 @@ export function CalendarViewClient({ identifier }: CalendarViewClientProps) {
 
   // Redirect from ID to public URL if available (similar to user profiles)
   useEffect(() => {
-    if (calendarResponse && identifier.startsWith('rlly') && calendarResponse.calendar?.publicUrl) {
-      router.replace(`/cal/${calendarResponse.calendar.publicUrl}`)
+    // Only redirect if we found calendar by ID and it has a public URL
+    if (calendarById?.status === "public" && calendarById.calendar?.publicUrl && identifier !== calendarById.calendar.publicUrl) {
+      router.replace(`/cal/${calendarById.calendar.publicUrl}`)
     }
-  }, [calendarResponse, identifier, router])
+  }, [calendarById, identifier, router])
 
   // Update document title with calendar name
   useEffect(() => {
@@ -270,7 +264,7 @@ export function CalendarViewClient({ identifier }: CalendarViewClientProps) {
   }, [calendar])
 
   // Show loading while data is loading
-  if (calendarByUrl === undefined && calendarById === undefined) {
+  if (calendarById === undefined || calendarByUrl === undefined) {
     return (
       <div className="flex-1 flex justify-center px-6 pt-16 pb-12">
         <div className="w-full max-w-4xl">
@@ -348,8 +342,8 @@ export function CalendarViewClient({ identifier }: CalendarViewClientProps) {
     )
   }
 
-  // Show not found if calendar doesn't exist
-  if (calendar === null && !isPrivate) {
+  // Show not found if calendar doesn't exist (but only if we have a response)
+  if (calendarResponse && calendarResponse.status === "not_found") {
     notFound()
   }
 
