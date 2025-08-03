@@ -4,7 +4,6 @@ import { useQuery } from "convex/react"
 import { useRouter } from "next/navigation"
 import { api } from "@workspace/backend/convex/_generated/api.js"
 import { Card, CardContent } from "@workspace/ui/components/card"
-import { OptimizedAvatar } from "@/components/optimized-avatar"
 
 type CalendarWithSubscriberCount = {
   _id: string

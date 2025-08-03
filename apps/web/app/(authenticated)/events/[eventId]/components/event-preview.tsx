@@ -4,7 +4,7 @@ import '../../create/components/description-preview.css'
 import React, { useState } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { Calendar, Clock, MapPin, Users, Lock, Globe, CheckCircle, Timer, Video, ExternalLink, ChevronDown, ChevronUp, UserPlus, Share2, Edit, Trash2 } from "lucide-react"
+import { Calendar, Clock, MapPin, Users, Lock, Globe, CheckCircle, Timer, Video, ExternalLink, ChevronDown, ChevronUp, UserPlus, Share2 } from "lucide-react"
 import { Badge } from "@workspace/ui/components/badge"
 import { Button } from "@workspace/ui/components/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@workspace/ui/components/tooltip"
@@ -33,13 +33,11 @@ export function EventPreview({ event }: EventPreviewProps) {
   const [shareEventOpen, setShareEventOpen] = useState(false)
   const [descriptionExpanded, setDescriptionExpanded] = useState(false)
   const [isJoining, setIsJoining] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
   
   // Get current user and their RSVP status
   const currentUser = useQuery(api.auth.getCurrentUser)
   const userRSVP = useQuery(api.eventRSVPs.getUserRSVP, { eventId: event._id })
   const updateRSVP = useMutation(api.eventRSVPs.updateRSVP)
-  const deleteEvent = useMutation(api.events.deleteEvent)
   
   // Get approval request status
   const approvalStatus = useQuery(api.eventApprovals.getApprovalRequestStatus, { eventId: event._id })
@@ -132,27 +130,6 @@ export function EventPreview({ event }: EventPreviewProps) {
     // The userRSVP query will automatically update
   }
 
-  const handleEditEvent = () => {
-    router.push(`/events/${event._id}/edit`)
-  }
-
-  const handleDeleteEvent = async () => {
-    if (!confirm("Are you sure you want to delete this event? This action cannot be undone.")) {
-      return
-    }
-
-    setIsDeleting(true)
-    try {
-      await deleteEvent({ eventId: event._id })
-      toast.success("Event deleted successfully")
-      router.push("/calendars")
-    } catch (error) {
-      console.error("Failed to delete event:", error)
-      toast.error("Failed to delete event. Please try again.")
-    } finally {
-      setIsDeleting(false)
-    }
-  }
 
   const getInitials = (name: string) => {
     return name
@@ -363,29 +340,15 @@ export function EventPreview({ event }: EventPreviewProps) {
                   <div className="text-xs text-muted-foreground">You have manage access for this event.</div>
                 </div>
               </div>
-              <div className="space-y-2">
-                <div className="flex gap-2">
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="flex-1 text-xs px-3 cursor-pointer" 
-                    onClick={handleEditEvent}
-                  >
-                    <Edit className="w-3 h-3 mr-1" />
-                    Edit
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="flex-1 text-xs px-3 cursor-pointer text-destructive hover:text-destructive" 
-                    onClick={handleDeleteEvent}
-                    disabled={isDeleting}
-                  >
-                    <Trash2 className="w-3 h-3 mr-1" />
-                    {isDeleting ? "Deleting..." : "Delete"}
-                  </Button>
-                </div>
-                
+              <div className="flex items-center gap-3">
+                <Button 
+                  size="sm" 
+                  variant="default" 
+                  className="text-xs px-3 cursor-pointer"
+                  onClick={() => router.push(`/events/${event._id}/manage`)}
+                >
+                  Manage
+                </Button>
                 {/* Approval Management - Only show if event requires approval */}
                 {event.requiresApproval && (
                   <ApprovalRequestsDialog
@@ -394,10 +357,10 @@ export function EventPreview({ event }: EventPreviewProps) {
                       <Button 
                         size="sm" 
                         variant="outline" 
-                        className="w-full text-xs px-3 cursor-pointer"
+                        className="text-xs px-3 cursor-pointer"
                       >
                         <Users className="w-3 h-3 mr-1" />
-                        Manage Approvals
+                        Approvals
                       </Button>
                     }
                   />
