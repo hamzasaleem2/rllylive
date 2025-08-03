@@ -408,7 +408,10 @@ export function CalendarViewClient({ identifier }: CalendarViewClientProps) {
                     className="flex items-center gap-2 cursor-pointer hover:text-foreground transition-colors"
                     onClick={(e) => {
                       e.stopPropagation()
-                      router.push(`/user/${calendar.owner.username || calendar.owner._id}`)
+                      const identifier = calendar.owner.username || calendar.owner.rllyId
+                      if (identifier) {
+                        router.push(`/user/${identifier}`)
+                      }
                     }}
                   >
                     <Avatar className="w-5 h-5">
