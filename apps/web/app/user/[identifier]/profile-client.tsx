@@ -9,7 +9,9 @@ import { Skeleton } from "@workspace/ui/components/skeleton"
 import { Button } from "@workspace/ui/components/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@workspace/ui/components/tooltip"
-import { Copy, Check, Globe } from "lucide-react"
+import { Badge } from "@workspace/ui/components/badge"
+import { Card, CardContent } from "@workspace/ui/components/card"
+import { Copy, Check, Globe, Calendar, Clock, MapPin, Users, Video } from "lucide-react"
 
 interface ProfileClientProps {
   identifier: string
@@ -64,6 +66,14 @@ export function ProfileClient({ identifier }: ProfileClientProps) {
   
   // Determine which user data to use
   const user = userByUsername || userByRllyId
+  
+  // Get user profile stats and events
+  const userStats = useQuery(api.events.getUserProfileStats, 
+    user ? { userId: user._id } : "skip"
+  )
+  const userEvents = useQuery(api.events.getUserProfileEvents, 
+    user ? { userId: user._id, limit: 6 } : "skip"
+  )
   
   // Check authentication status - only show enhanced data if it's the user's own profile
   const isOwnProfile = currentUser?.rllyId === user?.rllyId
@@ -181,11 +191,15 @@ export function ProfileClient({ identifier }: ProfileClientProps) {
               
               <div className="flex gap-6">
                 <div>
-                  <span className="text-lg font-semibold text-foreground">0</span>
+                  <span className="text-lg font-semibold text-foreground">
+                    {userStats?.hosted ?? 0}
+                  </span>
                   <span className="text-sm text-muted-foreground ml-1">hosted</span>
                 </div>
                 <div>
-                  <span className="text-lg font-semibold text-foreground">0</span>
+                  <span className="text-lg font-semibold text-foreground">
+                    {userStats?.attended ?? 0}
+                  </span>
                   <span className="text-sm text-muted-foreground ml-1">attended</span>
                 </div>
               </div>
@@ -270,12 +284,137 @@ export function ProfileClient({ identifier }: ProfileClientProps) {
             </h2>
           </div>
           <div className="max-h-96 overflow-y-auto">
-            <div className="p-6 text-center">
-              <p className="text-sm text-muted-foreground">No events yet</p>
-            </div>
+            {userEvents === undefined ? (
+              <div className="p-6 space-y-3">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="border rounded-lg p-4">
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0 text-center min-w-[60px]">
+                        <Skeleton className="h-4 w-8 mb-1" />
+                        <Skeleton className="h-3 w-12" />
+                      </div>
+                      <div className="flex-1">
+                        <Skeleton className="h-4 w-32 mb-2" />
+                        <Skeleton className="h-3 w-24 mb-1" />
+                        <Skeleton className="h-3 w-20" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : userEvents && userEvents.length > 0 ? (
+              <div className="p-6 space-y-3">
+                {userEvents.map((event) => (
+                  <ProfileEventCard key={event._id} event={event} />
+                ))}
+              </div>
+            ) : (
+              <div className="p-6 text-center">
+                <Calendar className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">No events yet</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
     </div>
   )
-} 
+}
+
+function ProfileEventCard({ event }: { event: any }) {
+  const router = useRouter()
+  const startDate = new Date(event.startTime)
+  const endDate = new Date(event.endTime)
+  const now = new Date()
+  
+  const isLive = startDate <= now && endDate >= now
+  const isPast = endDate < now
+  
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: false,
+      timeZone: event.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+    })
+  }
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      timeZone: event.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+    })
+  }
+
+  const getEventStatus = () => {
+    if (isLive) {
+      return <Badge variant="destructive" className="bg-orange-500 hover:bg-orange-600 text-xs">LIVE</Badge>
+    }
+    if (isPast) {
+      return <Badge variant="secondary" className="text-xs">Past</Badge>
+    }
+    return <Badge variant="outline" className="text-xs">Upcoming</Badge>
+  }
+
+  const getTypeIndicator = () => {
+    if (event.type === "hosted") {
+      return <Badge variant="default" className="text-xs bg-blue-500 hover:bg-blue-600">Hosted</Badge>
+    }
+    return <Badge variant="outline" className="text-xs">Attended</Badge>
+  }
+
+  return (
+    <Card 
+      className="cursor-pointer hover:shadow-md transition-all duration-200"
+      onClick={() => router.push(`/events/${event._id}`)}
+    >
+      <CardContent className="p-4">
+        <div className="flex items-start gap-4">
+          {/* Date/Time section */}
+          <div className="flex-shrink-0 text-center min-w-[60px]">
+            <div className="text-sm font-semibold text-foreground">
+              {formatDate(startDate)}
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {formatTime(startDate)}
+            </div>
+          </div>
+          
+          {/* Event info */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-2">
+              {getEventStatus()}
+              {getTypeIndicator()}
+            </div>
+            
+            <h3 className="font-medium text-sm leading-tight mb-2 line-clamp-1">
+              {event.name}
+            </h3>
+            
+            {/* Calendar info */}
+            {event.calendar && (
+              <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
+                <Calendar className="w-3 h-3" />
+                <span className="truncate">{event.calendar.name}</span>
+              </div>
+            )}
+            
+            {/* Location */}
+            {event.location && (
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                {event.location.toLowerCase().includes('virtual') || 
+                 event.location.toLowerCase().includes('online') ? (
+                  <Video className="w-3 h-3" />
+                ) : (
+                  <MapPin className="w-3 h-3" />
+                )}
+                <span className="truncate">{event.location}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
