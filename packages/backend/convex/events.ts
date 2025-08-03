@@ -584,14 +584,14 @@ export const getUserProfileStats = query({
   },
 })
 
-// Get user profile events (both hosted and attended) - public query
+// Get user profile events (only hosted events) - public query
 export const getUserProfileEvents = query({
   args: { 
     userId: v.id("users"),
     limit: v.optional(v.number())
   },
   handler: async (ctx, { userId, limit = 10 }) => {
-    // Get events hosted by this user
+    // Get events hosted by this user (through their calendars)
     const calendars = await ctx.db
       .query("calendars")
       .withIndex("by_owner", (q) => q.eq("ownerId", userId))
@@ -599,65 +599,36 @@ export const getUserProfileEvents = query({
 
     const calendarIds = calendars.map(c => c._id)
     
-    let hostedEvents: any[] = []
-    if (calendarIds.length > 0) {
-      const events = await ctx.db
-        .query("events")
-        .collect()
-      
-      hostedEvents = events
-        .filter(event => calendarIds.includes(event.calendarId))
-        .map(event => ({
-          ...event,
-          type: "hosted" as const,
-          calendar: calendars.find(c => c._id === event.calendarId)
-        }))
+    if (calendarIds.length === 0) {
+      return []
     }
 
-    // Get events attended by this user
-    const attendedRSVPs = await ctx.db
-      .query("eventRSVPs")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
+    const events = await ctx.db
+      .query("events")
       .collect()
-
-    const attendedEventIds = attendedRSVPs
-      .filter(rsvp => rsvp.status === "going")
-      .map(rsvp => rsvp.eventId)
-
-    const attendedEvents = await Promise.all(
-      attendedEventIds.map(async (eventId) => {
-        const event = await ctx.db.get(eventId)
-        if (!event) return null
-        
-        const calendar = await ctx.db.get(event.calendarId)
-        return {
-          ...event,
-          type: "attended" as const,
-          calendar
-        }
-      })
+    
+    const hostedEvents = await Promise.all(
+      events
+        .filter(event => calendarIds.includes(event.calendarId))
+        .map(async (event) => {
+          const calendar = calendars.find(c => c._id === event.calendarId)
+          // Get the calendar owner (which is the event host)
+          const owner = await ctx.db.get(calendar?.ownerId!)
+          return {
+            ...event,
+            calendar,
+            owner: owner ? {
+              _id: owner._id,
+              name: owner.name,
+              username: owner.username,
+              image: owner.image,
+            } : null
+          }
+        })
     )
 
-    // Combine events and deduplicate by event ID
-    // If user both hosted and attended the same event, prioritize "hosted"
-    const eventMap = new Map()
-    
-    // Add hosted events first (they take priority)
-    hostedEvents.forEach(event => {
-      eventMap.set(event._id, event)
-    })
-    
-    // Add attended events only if not already in map
-    attendedEvents.filter(e => e !== null).forEach(event => {
-      if (!eventMap.has(event._id)) {
-        eventMap.set(event._id, event)
-      }
-    })
-    
-    // Convert back to array and sort by start time (most recent first)
-    const allEvents = Array.from(eventMap.values())
-      .sort((a, b) => b.startTime - a.startTime)
-
-    return allEvents.slice(0, limit)
+    return hostedEvents
+      .sort((a, b) => b.startTime - a.startTime) // Most recent first
+      .slice(0, limit)
   },
 })
