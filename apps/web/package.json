@@ -27,6 +27,7 @@
     "better-auth": "1.2.12",
     "convex": "^1.25.4",
     "convex-helpers": "^0.1.100",
+    "isomorphic-dompurify": "^2.26.0",
     "lucide-react": "^0.475.0",
     "mapbox-gl": "^3.13.0",
     "next": "^15.2.3",

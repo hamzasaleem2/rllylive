@@ -17,6 +17,7 @@ import { CapacitySelector } from "./components/capacity-selector"
 import { PublicPrivateSelector } from "./components/public-private-selector"
 import { Button } from "@workspace/ui/components/button"
 import { type ITimezoneOption } from "react-timezone-select"
+import { sanitizeText, sanitizeUrl } from "@/lib/sanitize"
 
 export default function CreateEventPage() {
   const router = useRouter()
@@ -153,21 +154,31 @@ export default function CreateEventPage() {
       const startTimestamp = startDateTime.getTime()
       const endTimestamp = endDateTime.getTime()
 
+      // Sanitize inputs before sending to backend
+      const sanitizedData = {
+        name: sanitizeText(eventName),
+        description: description ? sanitizeText(description) : undefined,
+        location: location ? sanitizeText(location) : undefined,
+        imageUrl: eventImage ? sanitizeUrl(eventImage) : undefined,
+        ticketName: ticketName ? sanitizeText(ticketName) : undefined,
+        ticketDescription: ticketDescription ? sanitizeText(ticketDescription) : undefined,
+      }
+
       // Create the event
       await createEvent({
-        name: eventName,
-        description: description || undefined,
+        name: sanitizedData.name,
+        description: sanitizedData.description,
         calendarId: selectedCalendarId as any,
         startTime: startTimestamp,
         endTime: endTimestamp,
         timezone: timezoneString,
-        location: location || undefined,
-        imageUrl: eventImage || undefined,
+        location: sanitizedData.location,
+        imageUrl: sanitizedData.imageUrl,
         imageStorageId: eventImageStorageId || undefined,
         ticketType: ticketType,
         ticketPrice: ticketType === "paid" ? ticketPrice : undefined,
-        ticketName: ticketName || undefined,
-        ticketDescription: ticketDescription || undefined,
+        ticketName: sanitizedData.ticketName,
+        ticketDescription: sanitizedData.ticketDescription,
         requiresApproval: requireApproval,
         hasCapacityLimit: hasCapacityLimit,
         capacity: hasCapacityLimit ? capacity : undefined,

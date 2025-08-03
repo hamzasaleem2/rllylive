@@ -1,6 +1,35 @@
 import { v } from "convex/values"
 import { mutation, query } from "./_generated/server"
 import { betterAuthComponent } from "./auth"
+import { enforceRateLimit } from "./rateLimit"
+
+// Input sanitization helpers
+function sanitizeText(text: string): string {
+  if (!text) return ''
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .trim()
+}
+
+function sanitizePublicUrl(url: string): string {
+  if (!url) return ''
+  return url
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]/g, '')
+    .slice(0, 50)
+}
+
+function sanitizeEmail(email: string): string {
+  if (!email) return ''
+  const sanitized = email.trim().toLowerCase()
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(sanitized) ? sanitized : ''
+}
 
 // Create a new calendar
 export const createCalendar = mutation({
@@ -20,29 +49,37 @@ export const createCalendar = mutation({
       return null;
     }
 
-    // Validate required fields
-    if (!args.name.trim()) {
+    // Rate limiting
+    await enforceRateLimit(ctx, user.userId, "createCalendar")
+
+    // Sanitize and validate required fields
+    const sanitizedName = sanitizeText(args.name)
+    const sanitizedDescription = args.description ? sanitizeText(args.description) : undefined
+    const sanitizedLocation = args.location ? sanitizeText(args.location) : undefined
+    const sanitizedPublicUrl = args.publicUrl ? sanitizePublicUrl(args.publicUrl) : undefined
+    
+    if (!sanitizedName) {
       throw new Error("Calendar name is required")
     }
 
-    if (args.name.length > 100) {
+    if (sanitizedName.length > 100) {
       throw new Error("Calendar name must be less than 100 characters")
     }
 
-    if (args.description && args.description.length > 500) {
+    if (sanitizedDescription && sanitizedDescription.length > 500) {
       throw new Error("Description must be less than 500 characters")
     }
 
     // Validate public URL if provided
-    if (args.publicUrl) {
-      if (!/^[a-zA-Z0-9-_]+$/.test(args.publicUrl)) {
-        throw new Error("Public URL can only contain letters, numbers, hyphens, and underscores")
+    if (sanitizedPublicUrl) {
+      if (!/^[a-z0-9_-]+$/.test(sanitizedPublicUrl)) {
+        throw new Error("Public URL can only contain lowercase letters, numbers, hyphens, and underscores")
       }
 
       // Check if public URL is already taken
       const existingCalendar = await ctx.db
         .query("calendars")
-        .withIndex("by_public_url", (q) => q.eq("publicUrl", args.publicUrl))
+        .withIndex("by_public_url", (q) => q.eq("publicUrl", sanitizedPublicUrl))
         .first()
 
       if (existingCalendar) {
@@ -70,13 +107,13 @@ export const createCalendar = mutation({
       coverImageUrl = url
     }
 
-    // Create the calendar
+    // Create the calendar with sanitized data
     const calendarId = await ctx.db.insert("calendars", {
-      name: args.name.trim(),
-      description: args.description?.trim(),
+      name: sanitizedName,
+      description: sanitizedDescription,
       color: args.color,
-      publicUrl: args.publicUrl?.trim(),
-      location: args.location?.trim(),
+      publicUrl: sanitizedPublicUrl,
+      location: sanitizedLocation,
       isGlobal: args.isGlobal || false,
       ownerId: user.userId as any,
       profileImage: profileImageUrl,
@@ -133,7 +170,7 @@ export const getCalendar = query({
     // Get subscriber count
     const subscriberCount = await ctx.db
       .query("calendarSubscriptions")
-      .withIndex("by_calendar", (q) => q.eq("calendarId", calendarId))
+      .withIndex("by_calendar", (q) => q.eq("calendarId", calendar._id))
       .collect()
       .then((subs) => subs.length)
 
@@ -179,30 +216,35 @@ export const updateCalendar = mutation({
       throw new Error("You can only edit your own calendars")
     }
 
-    // Validate fields
-    if (args.name !== undefined) {
-      if (!args.name.trim()) {
+    // Sanitize and validate fields
+    const sanitizedName = args.name !== undefined ? sanitizeText(args.name) : undefined
+    const sanitizedDescription = args.description !== undefined ? sanitizeText(args.description) : undefined
+    const sanitizedLocation = args.location !== undefined ? sanitizeText(args.location) : undefined
+    const sanitizedPublicUrl = args.publicUrl !== undefined ? sanitizePublicUrl(args.publicUrl) : undefined
+    
+    if (sanitizedName !== undefined) {
+      if (!sanitizedName) {
         throw new Error("Calendar name is required")
       }
-      if (args.name.length > 100) {
+      if (sanitizedName.length > 100) {
         throw new Error("Calendar name must be less than 100 characters")
       }
     }
 
-    if (args.description !== undefined && args.description.length > 500) {
+    if (sanitizedDescription !== undefined && sanitizedDescription.length > 500) {
       throw new Error("Description must be less than 500 characters")
     }
 
     // Validate public URL if provided
-    if (args.publicUrl !== undefined && args.publicUrl !== calendar.publicUrl) {
-      if (args.publicUrl && !/^[a-zA-Z0-9-_]+$/.test(args.publicUrl)) {
-        throw new Error("Public URL can only contain letters, numbers, hyphens, and underscores")
+    if (sanitizedPublicUrl !== undefined && sanitizedPublicUrl !== calendar.publicUrl) {
+      if (sanitizedPublicUrl && !/^[a-z0-9_-]+$/.test(sanitizedPublicUrl)) {
+        throw new Error("Public URL can only contain lowercase letters, numbers, hyphens, and underscores")
       }
 
-      if (args.publicUrl) {
+      if (sanitizedPublicUrl) {
         const existingCalendar = await ctx.db
           .query("calendars")
-          .withIndex("by_public_url", (q) => q.eq("publicUrl", args.publicUrl))
+          .withIndex("by_public_url", (q) => q.eq("publicUrl", sanitizedPublicUrl))
           .first()
 
         if (existingCalendar && existingCalendar._id !== args.calendarId) {
@@ -211,13 +253,13 @@ export const updateCalendar = mutation({
       }
     }
 
-    // Update the calendar
+    // Update the calendar with sanitized data
     await ctx.db.patch(args.calendarId, {
-      ...(args.name !== undefined && { name: args.name.trim() }),
-      ...(args.description !== undefined && { description: args.description?.trim() }),
+      ...(sanitizedName !== undefined && { name: sanitizedName }),
+      ...(sanitizedDescription !== undefined && { description: sanitizedDescription }),
       ...(args.color !== undefined && { color: args.color }),
-      ...(args.publicUrl !== undefined && { publicUrl: args.publicUrl?.trim() }),
-      ...(args.location !== undefined && { location: args.location?.trim() }),
+      ...(sanitizedPublicUrl !== undefined && { publicUrl: sanitizedPublicUrl }),
+      ...(sanitizedLocation !== undefined && { location: sanitizedLocation }),
       ...(args.isGlobal !== undefined && { isGlobal: args.isGlobal }),
     })
 
@@ -243,14 +285,16 @@ export const deleteCalendar = mutation({
       throw new Error("You can only delete your own calendars")
     }
 
+    // CRITICAL: Complete cascading delete implementation
     // First, get all events for this calendar
     const events = await ctx.db
       .query("events")
       .withIndex("by_calendar", (q) => q.eq("calendarId", calendarId))
       .collect()
 
-    // Delete all RSVPs for each event
+    // For each event, delete ALL related data
     for (const event of events) {
+      // 1. Delete all RSVPs for this event
       const eventRSVPs = await ctx.db
         .query("eventRSVPs")
         .withIndex("by_event", (q) => q.eq("eventId", event._id))
@@ -258,6 +302,36 @@ export const deleteCalendar = mutation({
       
       for (const rsvp of eventRSVPs) {
         await ctx.db.delete(rsvp._id)
+      }
+
+      // 2. Delete all invitations for this event
+      const eventInvitations = await ctx.db
+        .query("eventInvitations")
+        .withIndex("by_event", (q) => q.eq("eventId", event._id))
+        .collect()
+      
+      for (const invitation of eventInvitations) {
+        await ctx.db.delete(invitation._id)
+      }
+
+      // 3. Delete all attendees for this event
+      const eventAttendees = await ctx.db
+        .query("eventAttendees")
+        .withIndex("by_event", (q) => q.eq("eventId", event._id))
+        .collect()
+      
+      for (const attendee of eventAttendees) {
+        await ctx.db.delete(attendee._id)
+      }
+
+      // 4. Delete all reports for this event
+      const eventReports = await ctx.db
+        .query("eventReports")
+        .withIndex("by_event", (q) => q.eq("eventId", event._id))
+        .collect()
+      
+      for (const report of eventReports) {
+        await ctx.db.delete(report._id)
       }
     }
 
@@ -396,16 +470,16 @@ export const addCalendarMember = mutation({
       throw new Error("You can only add members to your own calendars")
     }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email.trim())) {
+    // Sanitize and validate email
+    const sanitizedEmail = sanitizeEmail(email)
+    if (!sanitizedEmail) {
       throw new Error("Please enter a valid email address")
     }
 
     // Find user by email
     const targetUser = await ctx.db
       .query("users")
-      .filter((q) => q.eq(q.field("email"), email.trim().toLowerCase()))
+      .filter((q) => q.eq(q.field("email"), sanitizedEmail))
       .first()
 
     if (!targetUser) {
@@ -754,7 +828,7 @@ export const getPublicCalendar = query({
     // Get subscriber count
     const subscriberCount = await ctx.db
       .query("calendarSubscriptions")
-      .withIndex("by_calendar", (q) => q.eq("calendarId", calendarId))
+      .withIndex("by_calendar", (q) => q.eq("calendarId", calendar._id))
       .collect()
       .then((subs) => subs.length)
 

@@ -1,6 +1,36 @@
 import { v } from "convex/values"
 import { mutation, query } from "./_generated/server"
 import { betterAuthComponent } from "./auth"
+import { enforceRateLimit } from "./rateLimit"
+
+// Input sanitization helpers
+function sanitizeText(text: string): string {
+  if (!text) return ''
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .trim()
+}
+
+function sanitizeUrl(url: string): string {
+  if (!url) return ''
+  const trimmedUrl = url.trim().toLowerCase()
+  
+  // Block dangerous protocols
+  if (
+    trimmedUrl.startsWith('javascript:') ||
+    trimmedUrl.startsWith('data:') ||
+    trimmedUrl.startsWith('vbscript:') ||
+    trimmedUrl.startsWith('file:')
+  ) {
+    return ''
+  }
+  
+  return url.trim()
+}
 
 // Create a new event
 export const createEvent = mutation({
@@ -33,16 +63,26 @@ export const createEvent = mutation({
       throw new Error("Unauthorized")
     }
 
-    // Validate required fields
-    if (!args.name.trim()) {
+    // Rate limiting
+    await enforceRateLimit(ctx, user.userId, "createEvent")
+
+    // Sanitize and validate required fields
+    const sanitizedName = sanitizeText(args.name)
+    const sanitizedDescription = args.description ? sanitizeText(args.description) : undefined
+    const sanitizedLocation = args.location ? sanitizeText(args.location) : undefined
+    const sanitizedImageUrl = args.imageUrl ? sanitizeUrl(args.imageUrl) : undefined
+    const sanitizedTicketName = args.ticketName ? sanitizeText(args.ticketName) : undefined
+    const sanitizedTicketDescription = args.ticketDescription ? sanitizeText(args.ticketDescription) : undefined
+    
+    if (!sanitizedName) {
       throw new Error("Event name is required")
     }
 
-    if (args.name.length > 200) {
+    if (sanitizedName.length > 200) {
       throw new Error("Event name must be less than 200 characters")
     }
 
-    if (args.description && args.description.length > 1000) {
+    if (sanitizedDescription && sanitizedDescription.length > 1000) {
       throw new Error("Description must be less than 1000 characters")
     }
 
@@ -71,22 +111,22 @@ export const createEvent = mutation({
       throw new Error("Capacity limit must be greater than 0")
     }
 
-    // Create the event
+    // Create the event with sanitized data
     const eventId = await ctx.db.insert("events", {
-      name: args.name.trim(),
-      description: args.description?.trim(),
+      name: sanitizedName,
+      description: sanitizedDescription,
       calendarId: args.calendarId,
       startTime: args.startTime,
       endTime: args.endTime,
       timezone: args.timezone,
-      location: args.location?.trim(),
-      imageUrl: args.imageUrl,
+      location: sanitizedLocation,
+      imageUrl: sanitizedImageUrl,
       imageStorageId: args.imageStorageId,
       theme: "Minimal", // Default theme
       ticketType: args.ticketType,
       ticketPrice: args.ticketType === "paid" ? args.ticketPrice : undefined,
-      ticketName: args.ticketName?.trim(),
-      ticketDescription: args.ticketDescription?.trim(),
+      ticketName: sanitizedTicketName,
+      ticketDescription: sanitizedTicketDescription,
       requiresApproval: args.requiresApproval || false,
       hasCapacityLimit: args.hasCapacityLimit || false,
       capacity: args.hasCapacityLimit ? args.capacity : undefined,
@@ -630,5 +670,193 @@ export const getUserProfileEvents = query({
     return hostedEvents
       .sort((a, b) => b.startTime - a.startTime) // Most recent first
       .slice(0, limit)
+  },
+})
+
+// Update event - CRITICAL MISSING FUNCTIONALITY
+export const updateEvent = mutation({
+  args: {
+    eventId: v.id("events"),
+    name: v.optional(v.string()),
+    description: v.optional(v.string()),
+    startTime: v.optional(v.number()),
+    endTime: v.optional(v.number()),
+    timezone: v.optional(v.string()),
+    location: v.optional(v.string()),
+    imageUrl: v.optional(v.string()),
+    imageStorageId: v.optional(v.string()),
+    ticketType: v.optional(v.union(v.literal("free"), v.literal("paid"))),
+    ticketPrice: v.optional(v.number()),
+    ticketName: v.optional(v.string()),
+    ticketDescription: v.optional(v.string()),
+    requiresApproval: v.optional(v.boolean()),
+    hasCapacityLimit: v.optional(v.boolean()),
+    capacity: v.optional(v.number()),
+    waitingList: v.optional(v.boolean()),
+    isPublic: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    const user = await betterAuthComponent.getAuthUser(ctx)
+    if (!user) {
+      throw new Error("Authentication required")
+    }
+
+    // Rate limiting
+    await enforceRateLimit(ctx, user.userId, "updateEvent", args.eventId)
+
+    // Get the event and verify permissions
+    const event = await ctx.db.get(args.eventId)
+    if (!event) {
+      throw new Error("Event not found")
+    }
+
+    // Check if user owns the calendar
+    const calendar = await ctx.db.get(event.calendarId)
+    if (!calendar) {
+      throw new Error("Calendar not found")
+    }
+
+    if (calendar.ownerId !== user.userId) {
+      throw new Error("You can only edit events in your own calendars")
+    }
+
+    // Sanitize and validate fields if provided
+    const sanitizedName = args.name !== undefined ? sanitizeText(args.name) : undefined
+    const sanitizedDescription = args.description !== undefined ? sanitizeText(args.description) : undefined
+    const sanitizedLocation = args.location !== undefined ? sanitizeText(args.location) : undefined
+    const sanitizedTicketName = args.ticketName !== undefined ? sanitizeText(args.ticketName) : undefined
+    const sanitizedTicketDescription = args.ticketDescription !== undefined ? sanitizeText(args.ticketDescription) : undefined
+    
+    if (sanitizedName !== undefined) {
+      if (!sanitizedName) {
+        throw new Error("Event name is required")
+      }
+      if (sanitizedName.length > 200) {
+        throw new Error("Event name must be less than 200 characters")
+      }
+    }
+
+    if (sanitizedDescription !== undefined && sanitizedDescription.length > 1000) {
+      throw new Error("Description must be less than 1000 characters")
+    }
+
+    if (args.startTime !== undefined && args.endTime !== undefined) {
+      if (args.startTime >= args.endTime) {
+        throw new Error("Start time must be before end time")
+      }
+    }
+
+    if (args.capacity !== undefined && args.capacity < 1) {
+      throw new Error("Capacity must be at least 1")
+    }
+
+    // Handle image upload if provided
+    let imageUrl: string | undefined = args.imageUrl
+    if (args.imageStorageId) {
+      const url = await ctx.storage.getUrl(args.imageStorageId)
+      if (!url) {
+        throw new Error("Failed to get image URL")
+      }
+      imageUrl = url
+    }
+
+    // Update the event with sanitized data
+    await ctx.db.patch(args.eventId, {
+      ...(sanitizedName !== undefined && { name: sanitizedName }),
+      ...(sanitizedDescription !== undefined && { description: sanitizedDescription }),
+      ...(args.startTime !== undefined && { startTime: args.startTime }),
+      ...(args.endTime !== undefined && { endTime: args.endTime }),
+      ...(args.timezone !== undefined && { timezone: args.timezone }),
+      ...(sanitizedLocation !== undefined && { location: sanitizedLocation }),
+      ...(imageUrl !== undefined && { imageUrl }),
+      ...(args.ticketType !== undefined && { ticketType: args.ticketType }),
+      ...(args.ticketPrice !== undefined && { ticketPrice: args.ticketPrice }),
+      ...(sanitizedTicketName !== undefined && { ticketName: sanitizedTicketName }),
+      ...(sanitizedTicketDescription !== undefined && { ticketDescription: sanitizedTicketDescription }),
+      ...(args.requiresApproval !== undefined && { requiresApproval: args.requiresApproval }),
+      ...(args.hasCapacityLimit !== undefined && { hasCapacityLimit: args.hasCapacityLimit }),
+      ...(args.capacity !== undefined && { capacity: args.capacity }),
+      ...(args.waitingList !== undefined && { waitingList: args.waitingList }),
+      ...(args.isPublic !== undefined && { isPublic: args.isPublic }),
+    })
+
+    return { success: true }
+  },
+})
+
+// Delete event - CRITICAL MISSING FUNCTIONALITY
+export const deleteEvent = mutation({
+  args: { eventId: v.id("events") },
+  handler: async (ctx, { eventId }) => {
+    const user = await betterAuthComponent.getAuthUser(ctx)
+    if (!user) {
+      throw new Error("Authentication required")
+    }
+
+    // Rate limiting
+    await enforceRateLimit(ctx, user.userId, "deleteEvent", eventId)
+
+    // Get the event and verify permissions
+    const event = await ctx.db.get(eventId)
+    if (!event) {
+      throw new Error("Event not found")
+    }
+
+    // Check if user owns the calendar
+    const calendar = await ctx.db.get(event.calendarId)
+    if (!calendar) {
+      throw new Error("Calendar not found")
+    }
+
+    if (calendar.ownerId !== user.userId) {
+      throw new Error("You can only delete events in your own calendars")
+    }
+
+    // CRITICAL: Proper cascading delete - Delete all related data
+    
+    // 1. Delete all RSVPs for this event
+    const eventRSVPs = await ctx.db
+      .query("eventRSVPs")
+      .withIndex("by_event", (q) => q.eq("eventId", eventId))
+      .collect()
+    
+    for (const rsvp of eventRSVPs) {
+      await ctx.db.delete(rsvp._id)
+    }
+
+    // 2. Delete all invitations for this event
+    const eventInvitations = await ctx.db
+      .query("eventInvitations")
+      .withIndex("by_event", (q) => q.eq("eventId", eventId))
+      .collect()
+    
+    for (const invitation of eventInvitations) {
+      await ctx.db.delete(invitation._id)
+    }
+
+    // 3. Delete all attendees for this event
+    const eventAttendees = await ctx.db
+      .query("eventAttendees")
+      .withIndex("by_event", (q) => q.eq("eventId", eventId))
+      .collect()
+    
+    for (const attendee of eventAttendees) {
+      await ctx.db.delete(attendee._id)
+    }
+
+    // 4. Delete all reports for this event
+    const eventReports = await ctx.db
+      .query("eventReports")
+      .withIndex("by_event", (q) => q.eq("eventId", eventId))
+      .collect()
+    
+    for (const report of eventReports) {
+      await ctx.db.delete(report._id)
+    }
+
+    // 5. Finally, delete the event itself
+    await ctx.db.delete(eventId)
+
+    return { success: true }
   },
 })

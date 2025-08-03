@@ -226,13 +226,26 @@ function CalendarStats({ stats }: { stats: any }) {
   )
 }
 
+// Helper function to check if identifier looks like a Convex ID
+function isValidConvexId(identifier: string): boolean {
+  // Convex IDs are typically long alphanumeric strings starting with 'j'
+  // This is a more accurate check based on Convex ID patterns
+  return /^j[a-z0-9]{15,}$/.test(identifier)
+}
+
+// Helper function to safely convert string to calendar ID
+function toCalendarId(identifier: string): any {
+  return identifier as any
+}
+
 export function CalendarViewClient({ identifier }: CalendarViewClientProps) {
   const router = useRouter()
   
-  // Try both approaches - first by ID, then by URL
-  // We'll let the backend determine validity
+  // Only try to query by ID if identifier looks like a valid Convex ID
+  const shouldQueryById = isValidConvexId(identifier)
+  
   const calendarById = useQuery(api.calendars.getPublicCalendar, 
-    { calendarId: identifier as any }
+    shouldQueryById ? { calendarId: identifier as any } : "skip"
   )
   
   const calendarByUrl = useQuery(api.calendars.getPublicCalendarByUrl, 
@@ -240,7 +253,7 @@ export function CalendarViewClient({ identifier }: CalendarViewClientProps) {
   )
   
   // Use whichever one returns a valid calendar
-  const calendarResponse = calendarById?.status === "public" || calendarById?.status === "private" 
+  const calendarResponse = (shouldQueryById && (calendarById?.status === "public" || calendarById?.status === "private"))
     ? calendarById 
     : calendarByUrl
   const calendar = calendarResponse?.status === "public" ? calendarResponse.calendar : null
@@ -260,10 +273,15 @@ export function CalendarViewClient({ identifier }: CalendarViewClientProps) {
   // Redirect from ID to public URL if available (similar to user profiles)
   useEffect(() => {
     // Only redirect if we found calendar by ID and it has a public URL
-    if (calendarById?.status === "public" && calendarById.calendar?.publicUrl && identifier !== calendarById.calendar.publicUrl) {
+    if (shouldQueryById && 
+        calendarById?.status === "public" && 
+        calendarById.calendar && 
+        'publicUrl' in calendarById.calendar && 
+        calendarById.calendar.publicUrl && 
+        identifier !== calendarById.calendar.publicUrl) {
       router.replace(`/cal/${calendarById.calendar.publicUrl}`)
     }
-  }, [calendarById, identifier, router])
+  }, [calendarById, identifier, router, shouldQueryById])
 
   // Update document title with calendar name
   useEffect(() => {
@@ -273,7 +291,7 @@ export function CalendarViewClient({ identifier }: CalendarViewClientProps) {
   }, [calendar])
 
   // Show loading while data is loading
-  if (calendarById === undefined || calendarByUrl === undefined) {
+  if ((shouldQueryById && calendarById === undefined) || calendarByUrl === undefined) {
     return (
       <div className="flex-1 flex justify-center px-6 pt-16 pb-12">
         <div className="w-full max-w-4xl">
@@ -357,7 +375,7 @@ export function CalendarViewClient({ identifier }: CalendarViewClientProps) {
   }
 
   // Get the best identifier for copying (public URL if available, otherwise ID)
-  const copyIdentifier = calendar?.publicUrl || calendar?._id
+  const copyIdentifier = (calendar && 'publicUrl' in calendar && calendar.publicUrl) ? calendar.publicUrl : calendar?._id
 
   return (
     <div className="flex-1 flex justify-center px-6 pt-16 pb-12">
@@ -367,7 +385,7 @@ export function CalendarViewClient({ identifier }: CalendarViewClientProps) {
           <div className="flex items-start gap-4">
             {/* Calendar Avatar */}
             <div className="flex-shrink-0">
-              {calendar?.profileImage ? (
+              {(calendar && 'profileImage' in calendar && calendar.profileImage) ? (
                 <img 
                   src={calendar.profileImage} 
                   alt={calendar.name}
@@ -389,40 +407,42 @@ export function CalendarViewClient({ identifier }: CalendarViewClientProps) {
                 <CopyLinkButton identifier={copyIdentifier} />
               </div>
               
-              {calendar?.description && (
+              {(calendar && 'description' in calendar && calendar.description) && (
                 <p className="text-sm text-muted-foreground mb-3 max-w-2xl">
                   {calendar.description}
                 </p>
               )}
 
-              {calendar?.location && (
+              {(calendar && 'location' in calendar && calendar.location) && (
                 <div className="flex items-center gap-1 text-sm text-muted-foreground mb-3">
                   <MapPin className="h-4 w-4" />
                   <span>{calendar.location}</span>
                 </div>
               )}
               
-              {calendar?.owner && (
+              {(calendar && 'owner' in calendar && calendar.owner) && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <span>Created by</span>
                   <div 
                     className="flex items-center gap-2 cursor-pointer hover:text-foreground transition-colors"
                     onClick={(e) => {
                       e.stopPropagation()
-                      const identifier = calendar.owner.username || calendar.owner.rllyId
-                      if (identifier) {
-                        router.push(`/user/${identifier}`)
+                      if (calendar.owner) {
+                        const identifier = calendar.owner.username
+                        if (identifier) {
+                          router.push(`/user/${identifier}`)
+                        }
                       }
                     }}
                   >
                     <Avatar className="w-5 h-5">
-                      <AvatarImage src={calendar.owner.image || undefined} />
+                      <AvatarImage src={calendar.owner?.image || undefined} />
                       <AvatarFallback className="text-xs">
-                        {calendar.owner.name?.[0] || calendar.owner.username?.[0] || '?'}
+                        {calendar.owner?.name?.[0] || calendar.owner?.username?.[0] || '?'}
                       </AvatarFallback>
                     </Avatar>
                     <span className="font-medium">
-                      {calendar.owner.name || calendar.owner.username}
+                      {calendar.owner?.name || calendar.owner?.username}
                     </span>
                   </div>
                 </div>

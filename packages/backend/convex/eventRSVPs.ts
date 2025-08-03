@@ -23,6 +23,37 @@ export const updateRSVP = mutation({
       throw new Error("Event not found")
     }
 
+    // Check if event requires approval
+    if (event.requiresApproval && args.status === "going") {
+      // Check if user has an approved request
+      const approvalRequest = await ctx.db
+        .query("eventApprovalRequests")
+        .withIndex("by_event_user", (q) => 
+          q.eq("eventId", args.eventId).eq("userId", user.userId)
+        )
+        .first()
+
+      // Allow if user is the event creator or calendar owner
+      const calendar = await ctx.db.get(event.calendarId)
+      const isCreator = event.createdById === user.userId
+      const isCalendarOwner = calendar && calendar.ownerId === user.userId
+
+      if (!isCreator && !isCalendarOwner) {
+        if (!approvalRequest) {
+          throw new Error("This event requires approval. Please request approval first.")
+        }
+        if (approvalRequest.status === "pending") {
+          throw new Error("Your approval request is pending review.")
+        }
+        if (approvalRequest.status === "rejected") {
+          throw new Error("Your approval request was rejected. You cannot RSVP to this event.")
+        }
+        if (approvalRequest.status !== "approved") {
+          throw new Error("You need approval to attend this event.")
+        }
+      }
+    }
+
     // Check if event is public or user is invited/has access
     if (!event.isPublic) {
       // Check if user is invited or is the creator

@@ -4,18 +4,21 @@ import '../../create/components/description-preview.css'
 import React, { useState } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { Calendar, Clock, MapPin, Users, Lock, Globe, CheckCircle, Timer, Video, ExternalLink, ChevronDown, ChevronUp, UserPlus, Share2 } from "lucide-react"
+import { Calendar, Clock, MapPin, Users, Lock, Globe, CheckCircle, Timer, Video, ExternalLink, ChevronDown, ChevronUp, UserPlus, Share2, Edit, Trash2 } from "lucide-react"
 import { Badge } from "@workspace/ui/components/badge"
 import { Button } from "@workspace/ui/components/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@workspace/ui/components/tooltip"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@workspace/ui/components/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar"
 import { ContactHostDialog } from "./contact-host-dialog"
 import { ReportEventDialog } from "./report-event-dialog"
 import { CancelRegistrationDialog } from "./cancel-registration-dialog"
 import { InviteFriendDialog } from "./invite-friend-dialog"
 import { ShareEventDialog } from "./share-event-dialog"
+import { ApprovalRequestsDialog } from "./approval-requests-dialog"
 import { useQuery, useMutation } from "convex/react"
 import { api } from "@workspace/backend/convex/_generated/api.js"
+import { toast } from "sonner"
 
 interface EventPreviewProps {
   event: any
@@ -30,11 +33,17 @@ export function EventPreview({ event }: EventPreviewProps) {
   const [shareEventOpen, setShareEventOpen] = useState(false)
   const [descriptionExpanded, setDescriptionExpanded] = useState(false)
   const [isJoining, setIsJoining] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   
   // Get current user and their RSVP status
   const currentUser = useQuery(api.auth.getCurrentUser)
   const userRSVP = useQuery(api.eventRSVPs.getUserRSVP, { eventId: event._id })
   const updateRSVP = useMutation(api.eventRSVPs.updateRSVP)
+  const deleteEvent = useMutation(api.events.deleteEvent)
+  
+  // Get approval request status
+  const approvalStatus = useQuery(api.eventApprovals.getApprovalRequestStatus, { eventId: event._id })
+  const requestApproval = useMutation(api.eventApprovals.requestEventApproval)
   
   // Get attendees who are going (public query)
   const attendingUsers = useQuery(api.eventRSVPs.getEventAttendees, { 
@@ -88,6 +97,20 @@ export function EventPreview({ event }: EventPreviewProps) {
     
     setIsJoining(true)
     try {
+      // Check if event requires approval
+      if (event.requiresApproval && !event.userStatus?.isCreator && !event.userStatus?.isCalendarOwner) {
+        // Check if user already has an approved request
+        if (!approvalStatus || approvalStatus.status !== "approved") {
+          await requestApproval({
+            eventId: event._id,
+            message: "I would like to attend this event."
+          })
+          toast.success("Approval request sent! You'll be notified when reviewed.")
+          return
+        }
+      }
+      
+      // Proceed with normal RSVP
       await updateRSVP({
         eventId: event._id,
         status: "going"
@@ -95,6 +118,7 @@ export function EventPreview({ event }: EventPreviewProps) {
       // The userRSVP query will automatically update
     } catch (error) {
       console.error("Failed to join event:", error)
+      toast.error(error instanceof Error ? error.message : "Failed to join event")
     } finally {
       setIsJoining(false)
     }
@@ -106,6 +130,28 @@ export function EventPreview({ event }: EventPreviewProps) {
 
   const handleRegistrationCancelled = () => {
     // The userRSVP query will automatically update
+  }
+
+  const handleEditEvent = () => {
+    router.push(`/events/${event._id}/edit`)
+  }
+
+  const handleDeleteEvent = async () => {
+    if (!confirm("Are you sure you want to delete this event? This action cannot be undone.")) {
+      return
+    }
+
+    setIsDeleting(true)
+    try {
+      await deleteEvent({ eventId: event._id })
+      toast.success("Event deleted successfully")
+      router.push("/calendars")
+    } catch (error) {
+      console.error("Failed to delete event:", error)
+      toast.error("Failed to delete event. Please try again.")
+    } finally {
+      setIsDeleting(false)
+    }
   }
 
   const getInitials = (name: string) => {
@@ -316,9 +362,46 @@ export function EventPreview({ event }: EventPreviewProps) {
                 <div className="flex-1 min-w-0">
                   <div className="text-xs text-muted-foreground">You have manage access for this event.</div>
                 </div>
-                <Button size="sm" variant="default" className="text-xs px-3 cursor-pointer">
-                  Manage
-                </Button>
+              </div>
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="flex-1 text-xs px-3 cursor-pointer" 
+                    onClick={handleEditEvent}
+                  >
+                    <Edit className="w-3 h-3 mr-1" />
+                    Edit
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="flex-1 text-xs px-3 cursor-pointer text-destructive hover:text-destructive" 
+                    onClick={handleDeleteEvent}
+                    disabled={isDeleting}
+                  >
+                    <Trash2 className="w-3 h-3 mr-1" />
+                    {isDeleting ? "Deleting..." : "Delete"}
+                  </Button>
+                </div>
+                
+                {/* Approval Management - Only show if event requires approval */}
+                {event.requiresApproval && (
+                  <ApprovalRequestsDialog
+                    eventId={event._id}
+                    trigger={
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="w-full text-xs px-3 cursor-pointer"
+                      >
+                        <Users className="w-3 h-3 mr-1" />
+                        Manage Approvals
+                      </Button>
+                    }
+                  />
+                )}
               </div>
             </div>
           ) : (
@@ -753,21 +836,70 @@ export function EventPreview({ event }: EventPreviewProps) {
                     </div>
                   )}
 
-                  {/* One-Click RSVP Button */}
-                  <Button 
-                    className="w-full bg-primary hover:bg-primary/90" 
-                    onClick={handleJoinEvent}
-                    disabled={isJoining || isPast}
-                    size="lg"
-                    variant={isPast ? "secondary" : "default"}
-                  >
-                    {isPast 
-                      ? "Event Has Ended" 
-                      : isJoining 
-                        ? "Registering..." 
-                        : "One-Click RSVP"
-                    }
-                  </Button>
+                  {/* RSVP/Approval Button */}
+                  {event.requiresApproval && !event.userStatus?.isCreator && !event.userStatus?.isCalendarOwner ? (
+                    // Event requires approval
+                    approvalStatus?.status === "pending" ? (
+                      <Button 
+                        className="w-full bg-yellow-500 hover:bg-yellow-600" 
+                        disabled
+                        size="lg"
+                      >
+                        Approval Pending
+                      </Button>
+                    ) : approvalStatus?.status === "rejected" ? (
+                      <Button 
+                        className="w-full bg-red-500 hover:bg-red-600" 
+                        disabled
+                        size="lg"
+                      >
+                        Request Rejected
+                      </Button>
+                    ) : approvalStatus?.status === "approved" ? (
+                      <Button 
+                        className="w-full bg-primary hover:bg-primary/90" 
+                        onClick={handleJoinEvent}
+                        disabled={isJoining || isPast}
+                        size="lg"
+                        variant={isPast ? "secondary" : "default"}
+                      >
+                        {isPast 
+                          ? "Event Has Ended" 
+                          : isJoining 
+                            ? "Registering..." 
+                            : "Join Event"}
+                      </Button>
+                    ) : (
+                      <Button 
+                        className="w-full bg-blue-500 hover:bg-blue-600" 
+                        onClick={handleJoinEvent}
+                        disabled={isJoining || isPast}
+                        size="lg"
+                        variant={isPast ? "secondary" : "default"}
+                      >
+                        {isPast 
+                          ? "Event Has Ended" 
+                          : isJoining 
+                            ? "Requesting..." 
+                            : "Request Approval"}
+                      </Button>
+                    )
+                  ) : (
+                    // Regular RSVP
+                    <Button 
+                      className="w-full bg-primary hover:bg-primary/90" 
+                      onClick={handleJoinEvent}
+                      disabled={isJoining || isPast}
+                      size="lg"
+                      variant={isPast ? "secondary" : "default"}
+                    >
+                      {isPast 
+                        ? "Event Has Ended" 
+                        : isJoining 
+                          ? "Registering..." 
+                          : "One-Click RSVP"}
+                    </Button>
+                  )}
 
                   {/* Share Event Button for non-registered users */}
                   <div className="flex justify-center pt-2">

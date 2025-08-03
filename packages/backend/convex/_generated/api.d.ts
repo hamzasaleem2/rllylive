@@ -13,6 +13,7 @@ import type * as auth from "../auth.js";
 import type * as calendars from "../calendars.js";
 import type * as emails_components_BaseEmail from "../emails/components/BaseEmail.js";
 import type * as emails_verifyOTP from "../emails/verifyOTP.js";
+import type * as eventApprovals from "../eventApprovals.js";
 import type * as eventAttendees from "../eventAttendees.js";
 import type * as eventInvitations from "../eventInvitations.js";
 import type * as eventRSVPs from "../eventRSVPs.js";
@@ -20,6 +21,7 @@ import type * as eventReports from "../eventReports.js";
 import type * as events from "../events.js";
 import type * as http from "../http.js";
 import type * as lib_email from "../lib/email.js";
+import type * as rateLimit from "../rateLimit.js";
 import type * as users from "../users.js";
 
 import type {
@@ -42,6 +44,7 @@ declare const fullApi: ApiFromModules<{
   calendars: typeof calendars;
   "emails/components/BaseEmail": typeof emails_components_BaseEmail;
   "emails/verifyOTP": typeof emails_verifyOTP;
+  eventApprovals: typeof eventApprovals;
   eventAttendees: typeof eventAttendees;
   eventInvitations: typeof eventInvitations;
   eventRSVPs: typeof eventRSVPs;
@@ -49,6 +52,7 @@ declare const fullApi: ApiFromModules<{
   events: typeof events;
   http: typeof http;
   "lib/email": typeof lib_email;
+  rateLimit: typeof rateLimit;
   users: typeof users;
 }>;
 declare const fullApiWithMounts: typeof fullApi;

@@ -108,6 +108,28 @@ export default defineSchema({
   .index("by_status", ["status"])
   .index("by_event_status", ["eventId", "status"]),
 
+  // Event approval requests for events that require approval
+  eventApprovalRequests: defineTable({
+    eventId: v.id("events"),
+    userId: v.id("users"), // User requesting to join
+    status: v.union(
+      v.literal("pending"), 
+      v.literal("approved"), 
+      v.literal("rejected")
+    ),
+    requestedAt: v.number(), // When the request was made
+    reviewedAt: v.optional(v.number()), // When it was reviewed
+    reviewedBy: v.optional(v.id("users")), // Who reviewed it (event creator/calendar owner)
+    message: v.optional(v.string()), // Optional message from requester
+    reviewNotes: v.optional(v.string()), // Optional notes from reviewer
+    guestCount: v.optional(v.number()), // Number of additional guests requested
+  })
+  .index("by_event", ["eventId"])
+  .index("by_user", ["userId"])
+  .index("by_event_user", ["eventId", "userId"])
+  .index("by_status", ["status"])
+  .index("by_event_status", ["eventId", "status"]),
+
   eventAttendees: defineTable({
     eventId: v.id("events"),
     userId: v.id("users"),
@@ -146,4 +168,16 @@ export default defineSchema({
   .index("by_reporter", ["reportedBy"])
   .index("by_status", ["status"])
   .index("by_event_reporter", ["eventId", "reportedBy"]),
+
+  // Rate limiting tracking
+  rateLimitTracking: defineTable({
+    key: v.string(), // Unique key for user:action:identifier
+    userId: v.string(), // User ID being rate limited
+    action: v.string(), // Action being performed
+    timestamp: v.number(), // When this request was made
+    ip: v.optional(v.string()), // IP address for additional tracking
+  })
+  .index("by_key_timestamp", ["key", "timestamp"])
+  .index("by_user", ["userId"])
+  .index("by_user_action", ["userId", "action"]),
 });
