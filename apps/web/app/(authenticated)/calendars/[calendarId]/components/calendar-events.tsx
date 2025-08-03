@@ -86,7 +86,14 @@ export function CalendarEvents({ calendarId }: CalendarEventsProps) {
 
   const groupEventsByDate = (eventsList: any[]) => {
     const grouped = eventsList.reduce((acc: Record<string, any[]>, event: any) => {
-      const date = new Date(event.startTime).toDateString()
+      // Use event's timezone for grouping, fallback to local timezone
+      const eventTimeZone = event.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone
+      const date = new Date(event.startTime).toLocaleDateString('en-US', { 
+        timeZone: eventTimeZone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      })
       if (!acc[date]) {
         acc[date] = []
       }
@@ -118,17 +125,29 @@ export function CalendarEvents({ calendarId }: CalendarEventsProps) {
         <div className="absolute left-3 md:left-[163.5px] top-2 bottom-0 w-0.5 border-l border-dashed border-border"></div>
         
         <div className="space-y-10">
-          {groupedEvents.map(([dateString, dayEvents]) => (
-            <div key={dateString} className="flex flex-col md:flex-row md:items-start gap-4 md:gap-8 pl-12 md:pl-0">
-              {/* Date section */}
-              <div className="md:w-32 flex-shrink-0">
-                <div className="text-lg font-semibold text-foreground">
-                  {new Date(dateString).getDate()} {new Date(dateString).toLocaleDateString('en-US', { month: 'short' })}
+          {groupedEvents.map(([dateString, dayEvents]) => {
+            // Get timezone from first event in the group
+            const eventTimeZone = dayEvents[0]?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone
+            const displayDate = new Date(dayEvents[0]?.startTime)
+            
+            return (
+              <div key={dateString} className="flex flex-col md:flex-row md:items-start gap-4 md:gap-8 pl-12 md:pl-0">
+                {/* Date section */}
+                <div className="md:w-32 flex-shrink-0">
+                  <div className="text-lg font-semibold text-foreground">
+                    {displayDate.toLocaleDateString('en-US', { 
+                      day: 'numeric', 
+                      month: 'short',
+                      timeZone: eventTimeZone 
+                    })}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {displayDate.toLocaleDateString('en-US', { 
+                      weekday: 'long',
+                      timeZone: eventTimeZone 
+                    })}
+                  </div>
                 </div>
-                <div className="text-xs text-muted-foreground">
-                  {new Date(dateString).toLocaleDateString('en-US', { weekday: 'long' })}
-                </div>
-              </div>
               
               {/* Timeline dot */}
               <div className="absolute left-[9px] md:relative md:left-auto flex items-center justify-center w-2 h-2 bg-border rounded-full ring-4 ring-background flex-shrink-0 mt-2 z-10"></div>
@@ -140,7 +159,8 @@ export function CalendarEvents({ calendarId }: CalendarEventsProps) {
                 ))}
               </div>
             </div>
-          ))}
+            )
+          })}
         </div>
       </div>
     )

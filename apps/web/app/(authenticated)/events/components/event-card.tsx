@@ -39,6 +39,7 @@ export function EventCard({ event }: EventCardProps) {
       hour: 'numeric',
       minute: '2-digit',
       hour12: false,
+      timeZone: event.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
     })
   }
 

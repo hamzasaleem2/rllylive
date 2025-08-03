@@ -63,6 +63,7 @@ function EventCard({ event }: { event: any }) {
       hour: 'numeric',
       minute: '2-digit',
       hour12: false,
+      timeZone: event.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
     })
   }
 
