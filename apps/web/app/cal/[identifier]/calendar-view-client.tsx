@@ -49,6 +49,7 @@ function CopyLinkButton({ identifier }: { identifier?: string }) {
 }
 
 function EventCard({ event }: { event: any }) {
+  const router = useRouter()
   const startDate = new Date(event.startTime)
   const endDate = new Date(event.endTime)
   const now = new Date()
@@ -75,8 +76,15 @@ function EventCard({ event }: { event: any }) {
     return <Badge variant="outline">Upcoming</Badge>
   }
 
+  const handleEventClick = () => {
+    router.push(`/events/${event._id}`)
+  }
+
   return (
-    <div className="w-full bg-card border rounded-lg hover:shadow-md transition-all duration-200 cursor-pointer">
+    <div 
+      className="w-full bg-card border rounded-lg hover:shadow-md transition-all duration-200 cursor-pointer"
+      onClick={handleEventClick}
+    >
       <div className="p-6 flex gap-6">
         {/* Event info */}
         <div className="flex-1">
@@ -396,15 +404,23 @@ export function CalendarViewClient({ identifier }: CalendarViewClientProps) {
               {calendar?.owner && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <span>Created by</span>
-                  <Avatar className="w-5 h-5">
-                    <AvatarImage src={calendar.owner.image || undefined} />
-                    <AvatarFallback className="text-xs">
-                      {calendar.owner.name?.[0] || calendar.owner.username?.[0] || '?'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="font-medium">
-                    {calendar.owner.name || calendar.owner.username}
-                  </span>
+                  <div 
+                    className="flex items-center gap-2 cursor-pointer hover:text-foreground transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      router.push(`/user/${calendar.owner.username || calendar.owner._id}`)
+                    }}
+                  >
+                    <Avatar className="w-5 h-5">
+                      <AvatarImage src={calendar.owner.image || undefined} />
+                      <AvatarFallback className="text-xs">
+                        {calendar.owner.name?.[0] || calendar.owner.username?.[0] || '?'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="font-medium">
+                      {calendar.owner.name || calendar.owner.username}
+                    </span>
+                  </div>
                 </div>
               )}
             </div>
