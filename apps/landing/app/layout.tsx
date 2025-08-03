@@ -44,6 +44,11 @@ export const metadata: Metadata = {
     title: "rlly.live - Real-time events, really simple",
     description: "The modern event platform that actually works.",
   },
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
 }
 
 export default function RootLayout({
