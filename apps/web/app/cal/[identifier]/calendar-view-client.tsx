@@ -492,7 +492,6 @@ export function CalendarViewClient({ identifier }: CalendarViewClientProps) {
               </div>
             ) : (
               <div className="text-center py-12">
-                <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <p className="text-sm text-muted-foreground">No events yet</p>
               </div>
             )}
