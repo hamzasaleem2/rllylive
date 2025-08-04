@@ -482,36 +482,133 @@ export const addCalendarMember = mutation({
       .filter((q) => q.eq(q.field("email"), sanitizedEmail))
       .first()
 
-    if (!targetUser) {
-      throw new Error("No user found with this email address")
+    if (targetUser) {
+      // User exists - check if already subscribed
+      const existingSubscription = await ctx.db
+        .query("calendarSubscriptions")
+        .withIndex("by_calendar_user", (q) => 
+          q.eq("calendarId", calendarId).eq("userId", targetUser._id)
+        )
+        .first()
+
+      if (existingSubscription) {
+        throw new Error("This user is already a member of this calendar")
+      }
+      
+      // Don't allow adding the calendar owner as a member
+      if (targetUser._id === calendar.ownerId) {
+        throw new Error("You cannot add yourself as a member")
+      }
+      
+      // Add existing user directly to calendar
+      await ctx.db.insert("calendarSubscriptions", {
+        calendarId,
+        userId: targetUser._id,
+      })
+      
+      return { success: true, type: "existing_user", userId: targetUser._id }
+    } else {
+      // User doesn't exist - create pending invitation
+      
+      // Check if there's already a pending invitation
+      const existingInvitation = await ctx.db
+        .query("calendarInvitations")
+        .withIndex("by_calendar_email", (q) => 
+          q.eq("calendarId", calendarId).eq("email", sanitizedEmail)
+        )
+        .first()
+
+      if (existingInvitation) {
+        throw new Error("An invitation has already been sent to this email address")
+      }
+      
+      // Create pending invitation
+      const invitationId = await ctx.db.insert("calendarInvitations", {
+        calendarId,
+        email: sanitizedEmail,
+        invitedBy: user.userId as any,
+        status: "pending",
+        invitedAt: Date.now(),
+      })
+      
+      // TODO: Send invitation email here
+      // await ctx.runMutation(api.emailEngine.triggerEmailEvent, {
+      //   eventType: "calendar_invitation",
+      //   userId: user.userId, // Inviter
+      //   data: {
+      //     email: sanitizedEmail,
+      //     calendarName: calendar.name,
+      //     inviterName: user.name || user.username || "Someone",
+      //     joinUrl: `https://rlly.live/join/calendar/${invitationId}`,
+      //   }
+      // })
+      
+      return { success: true, type: "invitation_sent", invitationId }
+    }
+  },
+})
+
+// Accept calendar invitation after user signs up
+export const acceptPendingCalendarInvitations = mutation({
+  args: { 
+    email: v.string() 
+  },
+  handler: async (ctx, { email }) => {
+    const user = await betterAuthComponent.getAuthUser(ctx)
+    if (!user) {
+      throw new Error("Authentication required")
     }
 
-    // Check if user is already subscribed
-    const existingSubscription = await ctx.db
-      .query("calendarSubscriptions")
-      .withIndex("by_calendar_user", (q) => 
-        q.eq("calendarId", calendarId).eq("userId", targetUser._id)
-      )
-      .first()
+    // Find all pending invitations for this email
+    const pendingInvitations = await ctx.db
+      .query("calendarInvitations")
+      .withIndex("by_email", (q) => q.eq("email", email.toLowerCase().trim()))
+      .filter((q) => q.eq(q.field("status"), "pending"))
+      .collect()
 
-    if (existingSubscription) {
-      throw new Error("This user is already a member of this calendar")
+    const results = []
+
+    for (const invitation of pendingInvitations) {
+      try {
+        // Check if user is already subscribed to this calendar
+        const existingSubscription = await ctx.db
+          .query("calendarSubscriptions")
+          .withIndex("by_calendar_user", (q) => 
+            q.eq("calendarId", invitation.calendarId).eq("userId", user.userId)
+          )
+          .first()
+
+        if (!existingSubscription) {
+          // Add user to calendar
+          await ctx.db.insert("calendarSubscriptions", {
+            calendarId: invitation.calendarId,
+            userId: user.userId as any,
+          })
+        }
+
+        // Mark invitation as accepted
+        await ctx.db.patch(invitation._id, {
+          status: "accepted",
+          acceptedAt: Date.now(),
+        })
+
+        results.push({
+          calendarId: invitation.calendarId,
+          success: true
+        })
+      } catch (error) {
+        console.error("Error accepting calendar invitation:", error)
+        results.push({
+          calendarId: invitation.calendarId,
+          success: false,
+          error: error instanceof Error ? error.message : "Unknown error"
+        })
+      }
     }
-
-    // Don't allow adding the calendar owner as a member
-    if (targetUser._id === calendar.ownerId) {
-      throw new Error("Calendar owner is automatically a member")
-    }
-
-    // Create subscription
-    await ctx.db.insert("calendarSubscriptions", {
-      calendarId,
-      userId: targetUser._id as any,
-    })
 
     return { 
-      success: true, 
-      message: `${targetUser.name || targetUser.username || 'User'} has been added to the calendar`
+      processedInvitations: results.length,
+      results 
     }
   },
 })

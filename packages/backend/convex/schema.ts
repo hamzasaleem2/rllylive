@@ -38,6 +38,20 @@ export default defineSchema({
   .index("by_user", ["userId"])
   .index("by_calendar_user", ["calendarId", "userId"]),
 
+  calendarInvitations: defineTable({
+    calendarId: v.id("calendars"),
+    email: v.string(),
+    invitedBy: v.id("users"),
+    status: v.union(v.literal("pending"), v.literal("accepted"), v.literal("expired")),
+    invitedAt: v.number(), // Unix timestamp
+    acceptedAt: v.optional(v.number()), // Unix timestamp when accepted
+  })
+  .index("by_calendar", ["calendarId"])
+  .index("by_email", ["email"])
+  .index("by_calendar_email", ["calendarId", "email"])
+  .index("by_inviter", ["invitedBy"])
+  .index("by_status", ["status"]),
+
   events: defineTable({
     name: v.string(),
     description: v.optional(v.string()),
