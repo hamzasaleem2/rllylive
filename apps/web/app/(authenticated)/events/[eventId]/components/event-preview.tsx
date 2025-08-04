@@ -783,28 +783,37 @@ export function EventPreview({ event }: EventPreviewProps) {
 
                   {/* User Info */}
                   {currentUser && (
-                    <div className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg">
-                      <div className="relative">
-                        <Avatar className="w-12 h-12">
-                          <AvatarImage src={currentUser.image} />
-                          <AvatarFallback>{getInitials(currentUser.name || currentUser.username || 'User')}</AvatarFallback>
-                        </Avatar>
-                        {isLive && (
-                          <div className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-orange-500 rounded-full animate-pulse" />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium">{currentUser.name || currentUser.username || 'User'}</div>
-                        <div className="text-sm text-muted-foreground">{currentUser.email}</div>
-                      </div>
-                      {isLive && (
-                        <div className="bg-orange-500 text-white px-2 py-0.5 rounded text-xs font-medium">
-                          LIVE
+                    <div className="p-3 bg-muted/20 rounded-lg space-y-3">
+                      {/* User info row */}
+                      <div className="flex items-center gap-3">
+                        <div className="relative">
+                          <Avatar className="w-12 h-12">
+                            <AvatarImage src={currentUser.image} />
+                            <AvatarFallback>{getInitials(currentUser.name || currentUser.username || 'User')}</AvatarFallback>
+                          </Avatar>
+                          {isLive && (
+                            <div className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-orange-500 rounded-full animate-pulse" />
+                          )}
                         </div>
-                      )}
-                      {isFuture && timeUntilStart && (
-                        <div className="bg-blue-500 text-white px-2 py-0.5 rounded text-xs font-medium">
-                          {timeUntilStart}
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium">{currentUser.name || currentUser.username || 'User'}</div>
+                          <div className="text-sm text-muted-foreground">{currentUser.email}</div>
+                        </div>
+                      </div>
+                      
+                      {/* Status badges row */}
+                      {(isLive || (isFuture && timeUntilStart)) && (
+                        <div className="flex items-center gap-2">
+                          {isLive && (
+                            <div className="bg-orange-500 text-white px-2 py-0.5 rounded text-xs font-medium">
+                              LIVE
+                            </div>
+                          )}
+                          {isFuture && timeUntilStart && (
+                            <div className="bg-blue-500 text-white px-2 py-0.5 rounded text-xs font-medium">
+                              {timeUntilStart}
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
