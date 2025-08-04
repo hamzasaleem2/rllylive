@@ -13,7 +13,7 @@ export default function NotificationSettingsPage() {
   return (
     <PageLayout
       title="Settings"
-      rightElement={<SettingsNav activeTab="notifications" />}
+      rightElement={<SettingsNav />}
     >
       <NotificationsTab />
     </PageLayout>

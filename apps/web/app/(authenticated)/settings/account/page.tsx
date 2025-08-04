@@ -13,7 +13,7 @@ export default function AccountSettingsPage() {
   return (
     <PageLayout
       title="Settings"
-      rightElement={<SettingsNav activeTab="account" />}
+      rightElement={<SettingsNav />}
     >
       <AccountTab />
     </PageLayout>

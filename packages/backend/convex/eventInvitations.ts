@@ -1,6 +1,7 @@
 import { v } from "convex/values"
 import { mutation, query } from "./_generated/server"
 import { betterAuthComponent } from "./auth"
+import { api } from "./_generated/api"
 
 // Send invitation to an event
 export const sendInvitation = mutation({
@@ -69,7 +70,7 @@ export const sendInvitation = mutation({
     const invitedUser = await ctx.db.get(args.invitedUserId)
     if (invitedUser?.email) {
       // Trigger invitation email
-      await ctx.runMutation("emailEngine:triggerEmailEvent", {
+      await ctx.runMutation(api.emailEngine.triggerEmailEvent, {
         eventType: "event_invitation",
         userId: args.invitedUserId,
         data: {

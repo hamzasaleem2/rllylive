@@ -1,6 +1,7 @@
 import { v } from "convex/values"
 import { mutation, query } from "./_generated/server"
 import { betterAuthComponent } from "./auth"
+import { api } from "./_generated/api"
 
 // Create or update RSVP
 export const updateRSVP = mutation({
@@ -164,7 +165,7 @@ export const updateRSVP = mutation({
     if (event.createdById !== user.userId) {
       const hostUser = await ctx.db.get(event.createdById)
       if (hostUser?.email) {
-        await ctx.runMutation("emailEngine:triggerEmailEvent", {
+        await ctx.runMutation(api.emailEngine.triggerEmailEvent, {
           eventType: "event_rsvp",
           userId: event.createdById,
           data: {

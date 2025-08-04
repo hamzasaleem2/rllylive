@@ -38,8 +38,8 @@ export function GuestsTab({ event }: GuestsTabProps) {
     const searchLower = searchQuery.toLowerCase()
     return (
       user.name?.toLowerCase().includes(searchLower) ||
-      user.username?.toLowerCase().includes(searchLower) ||
-      user.email?.toLowerCase().includes(searchLower)
+      user.username?.toLowerCase().includes(searchLower)
+      // user.email?.toLowerCase().includes(searchLower)
     )
   })
 
@@ -204,7 +204,7 @@ export function GuestsTab({ event }: GuestsTabProps) {
                         )}
                       </div>
                       <p className="text-sm text-muted-foreground truncate">
-                        {rsvp.user.email || 'No email provided'}
+                        No email provided
                       </p>
                       <p className="text-xs text-muted-foreground">
                         Registered {formatDate(rsvp.rsvpAt)}

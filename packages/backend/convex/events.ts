@@ -2,6 +2,7 @@ import { v } from "convex/values"
 import { mutation, query } from "./_generated/server"
 import { betterAuthComponent } from "./auth"
 import { enforceRateLimit } from "./rateLimit"
+import { api } from "./_generated/api"
 
 // Input sanitization helpers
 function sanitizeText(text: string): string {
@@ -157,7 +158,7 @@ export const createEvent = mutation({
         if (subscription.userId !== user.userId) {
           const subscriber = await ctx.db.get(subscription.userId)
           if (subscriber?.email) {
-            await ctx.runMutation("emailEngine:triggerEmailEvent", {
+            await ctx.runMutation(api.emailEngine.triggerEmailEvent, {
               eventType: "new_event_notification",
               userId: subscription.userId,
               data: {
@@ -176,7 +177,7 @@ export const createEvent = mutation({
     }
 
     // Schedule "event goes live" notifications for event start time
-    await ctx.runMutation("eventScheduler:scheduleEventGoesLiveNotifications", {
+    await ctx.runMutation(api.eventScheduler.scheduleEventGoesLiveNotifications, {
       eventId: eventId
     })
 

@@ -1,6 +1,6 @@
 import { v } from "convex/values"
 import { mutation, action, internalQuery } from "./_generated/server"
-import { internal } from "./_generated/api"
+import { api, internal } from "./_generated/api"
 
 // Schedule "event goes live" notifications when event is created
 export const scheduleEventGoesLiveNotifications = mutation({
@@ -25,7 +25,7 @@ export const scheduleEventGoesLiveNotifications = mutation({
     
     // Only schedule if event is in the future
     if (eventStartTime > now) {
-      await ctx.scheduler.runAt(eventStartTime, internal.eventScheduler.sendEventGoesLiveNotifications, {
+      await ctx.scheduler.runAt(eventStartTime, api.eventScheduler.sendEventGoesLiveNotifications, {
         eventId: args.eventId
       })
     }
@@ -56,7 +56,7 @@ export const sendEventGoesLiveNotifications = action({
       })
       
       if (user?.email) {
-        await ctx.runMutation(internal.emailEngine.triggerEmailEvent, {
+        await ctx.runMutation(api.emailEngine.triggerEmailEvent, {
           eventType: "event_goes_live",
           userId: attendee.userId,
           data: {
