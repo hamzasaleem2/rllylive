@@ -18,21 +18,30 @@ import {
 
 interface DescriptionEditorProps {
   description: string
-  onDescriptionChange: (description: string) => void
+  onDescriptionChange?: (description: string) => void
+  readOnly?: boolean
 }
 
-export function DescriptionEditor({ description, onDescriptionChange }: DescriptionEditorProps) {
+export function DescriptionEditor({ description, onDescriptionChange, readOnly = false }: DescriptionEditorProps) {
   const [open, setOpen] = useState(false)
   const [localDescription, setLocalDescription] = useState(description)
 
   const handleDone = () => {
-    onDescriptionChange(localDescription)
+    if (onDescriptionChange) {
+      onDescriptionChange(localDescription)
+    }
     setOpen(false)
   }
 
   const handleCancel = () => {
     setLocalDescription(description) // Reset to original
     setOpen(false)
+  }
+
+  const handleClick = () => {
+    if (!readOnly) {
+      setOpen(true)
+    }
   }
 
   const stripHtml = (html: string) => {
@@ -45,30 +54,34 @@ export function DescriptionEditor({ description, onDescriptionChange }: Descript
     <>
       {hasDescription ? (
         <div 
-          className="border rounded-lg bg-muted/20 cursor-pointer hover:bg-muted/30 transition-colors"
-          onClick={() => setOpen(true)}
+          className={`border rounded-lg bg-muted/20 transition-colors ${
+            readOnly ? '' : 'cursor-pointer hover:bg-muted/30'
+          }`}
+          onClick={handleClick}
         >
-          <div className="flex items-center gap-2 p-4 pb-2">
-            <FileText className="w-3 h-3" />
-            <span className="text-xs font-medium">Event Description</span>
-          </div>
-          <div className="px-4 pb-4">
+          {!readOnly && (
+            <div className="flex items-center gap-2 p-4 pb-2">
+              <FileText className="w-3 h-3" />
+              <span className="text-xs font-medium">Event Description</span>
+            </div>
+          )}
+          <div className={readOnly ? "p-0" : "px-4 pb-4"}>
             <div 
-              className="description-preview max-h-32 overflow-y-auto"
+              className={`description-preview ${readOnly ? '' : 'max-h-32 overflow-y-auto'}`}
               dangerouslySetInnerHTML={{ __html: description }}
             />
           </div>
         </div>
-      ) : (
+      ) : !readOnly ? (
         <Button
           variant="outline"
-          onClick={() => setOpen(true)}
+          onClick={handleClick}
           className="w-full justify-start cursor-pointer text-sm"
         >
           <Plus className="w-3 h-3 mr-2" />
           Add Description
         </Button>
-      )}
+      ) : null}
 
       <Dialog open={open} onOpenChange={(isOpen) => {
         if (isOpen) {

@@ -1,6 +1,7 @@
 "use client"
 
 import '../../create/components/description-preview.css'
+import { DescriptionEditor } from '../../create/components/description-editor'
 import React, { useState } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -907,9 +908,9 @@ export function EventPreview({ event }: EventPreviewProps) {
           {hasDescription && (
             <div className="bg-card border rounded-lg p-6">
               <div className="text-sm text-muted-foreground mb-4">About Event</div>
-              <div 
-                className="description-preview"
-                dangerouslySetInnerHTML={{ __html: event.description }}
+              <DescriptionEditor 
+                description={event.description} 
+                readOnly={true}
               />
             </div>
           )}
