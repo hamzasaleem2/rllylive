@@ -48,6 +48,17 @@ export function DescriptionEditor({ description, onDescriptionChange, readOnly =
     return html.replace(/<[^>]*>/g, '').replace(/&[^;]+;/g, ' ')
   }
 
+  // Decode HTML entities for backward compatibility with old events
+  const decodeHtml = (html: string) => {
+    if (typeof document !== 'undefined') {
+      const textarea = document.createElement('textarea')
+      textarea.innerHTML = html
+      return textarea.value
+    }
+    return html
+  }
+
+  const displayDescription = readOnly ? decodeHtml(description) : description
   const hasDescription = description && stripHtml(description).trim() !== ''
 
   return (
@@ -68,7 +79,7 @@ export function DescriptionEditor({ description, onDescriptionChange, readOnly =
           <div className={readOnly ? "p-0" : "px-4 pb-4"}>
             <div 
               className={`description-preview ${readOnly ? '' : 'max-h-32 overflow-y-auto'}`}
-              dangerouslySetInnerHTML={{ __html: description }}
+              dangerouslySetInnerHTML={{ __html: displayDescription }}
             />
           </div>
         </div>
