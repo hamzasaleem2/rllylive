@@ -4,8 +4,10 @@ import type { NextRequest } from "next/server"
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   
-  // Check for session cookie (optimistic check for performance)
-  const sessionCookie = request.cookies.get('better-auth.session_token')
+  // Check for Better Auth session cookies (optimistic check for performance)
+  const sessionCookie = request.cookies.get('better-auth.session_token') || 
+                        request.cookies.get('session') ||
+                        request.cookies.get('better-auth.session')
   const isAuthenticated = !!sessionCookie
   
   // Home page logic
