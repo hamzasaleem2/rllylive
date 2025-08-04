@@ -17,7 +17,7 @@ import { CapacitySelector } from "./components/capacity-selector"
 import { PublicPrivateSelector } from "./components/public-private-selector"
 import { Button } from "@workspace/ui/components/button"
 import { type ITimezoneOption } from "react-timezone-select"
-import { sanitizeText, sanitizeUrl } from "@/lib/sanitize"
+import { sanitizeText, sanitizeUrl, sanitizeHtml } from "@/lib/sanitize"
 
 export default function CreateEventPage() {
   const router = useRouter()
@@ -157,7 +157,7 @@ export default function CreateEventPage() {
       // Sanitize inputs before sending to backend
       const sanitizedData = {
         name: sanitizeText(eventName),
-        description: description ? sanitizeText(description) : undefined,
+        description: description ? sanitizeHtml(description) : undefined,
         location: location ? sanitizeText(location) : undefined,
         imageUrl: eventImage ? sanitizeUrl(eventImage) : undefined,
         ticketName: ticketName ? sanitizeText(ticketName) : undefined,
