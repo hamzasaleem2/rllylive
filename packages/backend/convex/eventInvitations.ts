@@ -65,6 +65,26 @@ export const sendInvitation = mutation({
       message: args.message,
     })
 
+    // Get invited user data for email
+    const invitedUser = await ctx.db.get(args.invitedUserId)
+    if (invitedUser?.email) {
+      // Trigger invitation email
+      await ctx.runMutation("emailEngine:triggerEmailEvent", {
+        eventType: "event_invitation",
+        userId: args.invitedUserId,
+        data: {
+          invitedName: invitedUser.name || invitedUser.username || "User",
+          inviterName: user.name || user.username || "Someone",
+          eventName: event.name,
+          eventDate: event.startTime,
+          eventLocation: event.location,
+          message: args.message,
+          invitationUrl: `https://rlly.live/event/${args.eventId}`,
+          email: invitedUser.email,
+        }
+      })
+    }
+
     return { invitationId }
   },
 })

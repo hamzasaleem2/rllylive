@@ -160,6 +160,25 @@ export const updateRSVP = mutation({
       }
     }
 
+    // Notify event host about RSVP (if not the host RSVPing)
+    if (event.createdById !== user.userId) {
+      const hostUser = await ctx.db.get(event.createdById)
+      if (hostUser?.email) {
+        await ctx.runMutation("emailEngine:triggerEmailEvent", {
+          eventType: "event_rsvp",
+          userId: event.createdById,
+          data: {
+            hostName: hostUser.name || hostUser.username || "Host",
+            attendeeName: user.name || user.username || "Someone",
+            eventName: event.name,
+            rsvpStatus: args.status,
+            eventUrl: `https://rlly.live/event/${args.eventId}`,
+            email: hostUser.email,
+          }
+        })
+      }
+    }
+
     return { success: true }
   },
 })

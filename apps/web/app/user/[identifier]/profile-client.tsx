@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useQuery } from "convex/react"
+import { useQuery, useMutation } from "convex/react"
 import { api } from "@workspace/backend/convex/_generated/api.js"
 import { notFound, redirect } from "next/navigation"
 import { useRouter } from "next/navigation"
@@ -53,6 +53,7 @@ function CopyLinkButton({ identifier }: { identifier?: string }) {
     </Button>
   )
 }
+
 
 export function ProfileClient({ identifier }: ProfileClientProps) {
   const router = useRouter()
@@ -203,6 +204,7 @@ export function ProfileClient({ identifier }: ProfileClientProps) {
                   <span className="text-sm text-muted-foreground ml-1">attended</span>
                 </div>
               </div>
+              
               
               {/* Social Links */}
               {(displayUser?.instagram || displayUser?.twitter || displayUser?.website) && (

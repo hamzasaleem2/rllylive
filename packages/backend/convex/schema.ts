@@ -180,4 +180,109 @@ export default defineSchema({
   .index("by_key_timestamp", ["key", "timestamp"])
   .index("by_user", ["userId"])
   .index("by_user_action", ["userId", "action"]),
+
+  // Email Engine Tables
+  emailEvents: defineTable({
+    userId: v.string(),
+    type: v.string(), // EventType
+    data: v.any(), // Event-specific data
+    timestamp: v.number(),
+    processed: v.boolean(),
+    metadata: v.optional(v.any()),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_type", ["type"])
+    .index("by_processed", ["processed"])
+    .index("by_timestamp", ["timestamp"])
+    .index("by_user_type", ["userId", "type"]),
+
+  emailRules: defineTable({
+    trigger: v.string(), // EventType
+    conditions: v.optional(v.any()), // RuleConditions
+    delayMinutes: v.optional(v.number()), // 0 = immediate
+    template: v.string(), // Template ID
+    active: v.boolean(),
+    priority: v.optional(v.number()), // Lower number = higher priority
+    metadata: v.optional(v.any()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    createdBy: v.optional(v.string()),
+  })
+    .index("by_trigger", ["trigger"])
+    .index("by_active", ["active"])
+    .index("by_trigger_active", ["trigger", "active"])
+    .index("by_priority", ["priority"]),
+
+  emailTemplates: defineTable({
+    id: v.string(), // Unique template identifier
+    name: v.string(),
+    subject: v.string(), // Static subject line
+    componentPath: v.string(), // Path to React Email component
+    variables: v.array(v.string()), // Required props for the component
+    category: v.string(), // TemplateCategory
+    active: v.boolean(),
+    version: v.number(),
+    previewData: v.optional(v.any()), // Sample data for previews
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_template_id", ["id"])
+    .index("by_category", ["category"])
+    .index("by_active", ["active"])
+    .index("by_template_id_version", ["id", "version"]),
+
+  scheduledEmails: defineTable({
+    userId: v.string(),
+    ruleId: v.string(),
+    templateId: v.string(),
+    eventData: v.any(), // Data for template rendering
+    scheduledFor: v.number(), // timestamp
+    status: v.string(), // ScheduleStatus
+    attempts: v.number(),
+    maxAttempts: v.number(),
+    error: v.optional(v.string()),
+    lastAttemptAt: v.optional(v.number()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_scheduled", ["scheduledFor"])
+    .index("by_status", ["status"])
+    .index("by_user", ["userId"])
+    .index("by_scheduled_status", ["scheduledFor", "status"])
+    .index("by_status_scheduled", ["status", "scheduledFor"]),
+
+  emailMetrics: defineTable({
+    emailId: v.string(), // Reference to sent email
+    userId: v.string(),
+    templateId: v.string(),
+    ruleId: v.string(),
+    eventType: v.string(),
+    sentAt: v.number(),
+    deliveredAt: v.optional(v.number()),
+    openedAt: v.optional(v.number()),
+    clickedAt: v.optional(v.number()),
+    unsubscribedAt: v.optional(v.number()),
+    bounced: v.optional(v.boolean()),
+    error: v.optional(v.string()),
+    metadata: v.optional(v.any()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_template", ["templateId"])
+    .index("by_rule", ["ruleId"])
+    .index("by_event_type", ["eventType"])
+    .index("by_sent_at", ["sentAt"]),
+
+  ruleMetrics: defineTable({
+    ruleId: v.string(),
+    totalTriggers: v.number(),
+    successfulSends: v.number(),
+    failedSends: v.number(),
+    avgProcessingTime: v.number(),
+    lastTriggered: v.optional(v.number()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_rule", ["ruleId"])
+    .index("by_last_triggered", ["lastTriggered"]),
 });

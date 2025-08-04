@@ -143,6 +143,43 @@ export const createEvent = mutation({
       registeredAt: Date.now(),
     })
 
+    // Get calendar info for notifications
+    const calendarForNotifications = await ctx.db.get(args.calendarId)
+    if (calendarForNotifications) {
+      // Notify calendar subscribers about new event
+      const subscribers = await ctx.db
+        .query("calendarSubscriptions")
+        .withIndex("by_calendar", (q) => q.eq("calendarId", args.calendarId))
+        .collect()
+
+      for (const subscription of subscribers) {
+        // Don't notify the creator about their own event
+        if (subscription.userId !== user.userId) {
+          const subscriber = await ctx.db.get(subscription.userId)
+          if (subscriber?.email) {
+            await ctx.runMutation("emailEngine:triggerEmailEvent", {
+              eventType: "new_event_notification",
+              userId: subscription.userId,
+              data: {
+                subscriberName: subscriber.name || subscriber.username || "User",
+                hostName: user.name || user.username || "Someone",
+                eventName: sanitizedName,
+                eventDate: args.startTime,
+                calendarName: calendarForNotifications.name,
+                eventUrl: `https://rlly.live/event/${eventId}`,
+                email: subscriber.email,
+              }
+            })
+          }
+        }
+      }
+    }
+
+    // Schedule "event goes live" notifications for event start time
+    await ctx.runMutation("eventScheduler:scheduleEventGoesLiveNotifications", {
+      eventId: eventId
+    })
+
     return { eventId }
   },
 })
