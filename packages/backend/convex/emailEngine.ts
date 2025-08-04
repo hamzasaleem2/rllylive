@@ -5,7 +5,7 @@ import {
   EVENT_TYPES, 
   EmailEngineUtils,
   type EventType
-} from "@workspace/email-engine"
+} from "./lib/emailEngineTypes"
 import { render } from "@react-email/components"
 import * as React from "react"
 import { internal } from "./_generated/api"

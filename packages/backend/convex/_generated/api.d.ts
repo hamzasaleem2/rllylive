@@ -28,6 +28,7 @@ import type * as eventScheduler from "../eventScheduler.js";
 import type * as events from "../events.js";
 import type * as http from "../http.js";
 import type * as lib_email from "../lib/email.js";
+import type * as lib_emailEngineTypes from "../lib/emailEngineTypes.js";
 import type * as rateLimit from "../rateLimit.js";
 import type * as users from "../users.js";
 
@@ -66,6 +67,7 @@ declare const fullApi: ApiFromModules<{
   events: typeof events;
   http: typeof http;
   "lib/email": typeof lib_email;
+  "lib/emailEngineTypes": typeof lib_emailEngineTypes;
   rateLimit: typeof rateLimit;
   users: typeof users;
 }>;
