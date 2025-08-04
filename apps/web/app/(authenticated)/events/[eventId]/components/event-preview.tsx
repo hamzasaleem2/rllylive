@@ -906,13 +906,10 @@ export function EventPreview({ event }: EventPreviewProps) {
 
           {/* About Event Card */}
           {hasDescription && (
-            <div className="bg-card border rounded-lg p-6">
-              <div className="text-sm text-muted-foreground mb-4">About Event</div>
               <DescriptionEditor 
                 description={event.description} 
                 readOnly={true}
               />
-            </div>
           )}
 
 
