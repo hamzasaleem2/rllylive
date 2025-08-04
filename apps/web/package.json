@@ -37,7 +37,8 @@
     "react-map-gl": "^8.0.4",
     "react-timezone-select": "^3.2.8",
     "sonner": "^2.0.6",
-    "use-debounce": "^10.0.5"
+    "use-debounce": "^10.0.5",
+    "@workspace/email-engine": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20",
