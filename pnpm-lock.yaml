@@ -102,6 +102,9 @@ importers:
       '@workspace/backend':
         specifier: workspace:*
         version: link:../../packages/backend
+      '@workspace/email-engine':
+        specifier: workspace:*
+        version: link:../../packages/email-engine
       '@workspace/ui':
         specifier: workspace:*
         version: link:../../packages/ui
