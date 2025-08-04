@@ -278,7 +278,7 @@ export function CalendarSettings({ calendarId, calendar }: CalendarSettingsProps
               ? 'border-red-500'
               : 'border-border'
           }`}>
-            <span className="text-base text-muted-foreground font-mono">rlly.live/cal/</span>
+            <span className="text-base text-muted-foreground font-mono">app.rlly.live/cal/</span>
             <Input
               id="publicUrl"
               placeholder=""

@@ -316,7 +316,7 @@ export function CreateCalendarForm() {
               Public URL
             </label>
             <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg">
-              <span className="text-base text-muted-foreground font-mono">rlly.live/cal/</span>
+              <span className="text-base text-muted-foreground font-mono">app.rlly.live/cal/</span>
               <Input
                 placeholder=""
                 value={formData.publicUrl}
