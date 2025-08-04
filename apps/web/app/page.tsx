@@ -18,10 +18,22 @@ function AuthenticatedHome() {
   useEffect(() => {
     if (profileIdentifier) {
       router.replace(`/user/${profileIdentifier}`)
+    } else if (currentUser) {
+      // If user is authenticated but profile identifier is slow to load, 
+      // redirect to events after a shorter delay
+      const timeout = setTimeout(() => {
+        router.replace("/events")
+      }, 500)
+      return () => clearTimeout(timeout)
     }
-  }, [profileIdentifier, router])
+  }, [profileIdentifier, currentUser, router])
 
-  return null
+  // Show minimal loading state
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="text-muted-foreground">Redirecting...</div>
+    </div>
+  )
 }
 
 export default function Page() {
