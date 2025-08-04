@@ -5,7 +5,9 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   
   // Check for Better Auth session cookies (optimistic check for performance)
+  // On HTTPS (production), cookies have __Secure- prefix
   const sessionCookie = request.cookies.get('better-auth.session_token') || 
+                        request.cookies.get('__Secure-better-auth.session_token') ||
                         request.cookies.get('session') ||
                         request.cookies.get('better-auth.session')
   const isAuthenticated = !!sessionCookie
