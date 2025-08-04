@@ -742,13 +742,20 @@ export function EventPreview({ event }: EventPreviewProps) {
 
                 {/* Action Buttons */}
                 <div className="flex items-center gap-2">
-                  <Button 
-                    className="flex-1 bg-primary hover:bg-primary/90" 
-                    onClick={() => window.open(event.virtualLink || event.location, '_blank')}
-                  >
-                    <Video className="w-4 h-4 mr-2" />
-                    Join Event
-                  </Button>
+                <Button 
+  className="flex-1 bg-primary hover:bg-primary/90" 
+  onClick={() => {
+    const link = event.virtualLink || event.location;
+    const url = link.startsWith('http://') || link.startsWith('https://') 
+      ? link 
+      : `https://${link}`;
+    window.open(url, '_blank');
+  }}
+>
+  <Video className="w-4 h-4 mr-2" />
+  Join Event
+</Button>
+
                   
                   <Button variant="outline" className="flex-shrink-0" onClick={() => setInviteFriendOpen(true)}>
                     <UserPlus className="w-4 h-4 mr-2" />
