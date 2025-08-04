@@ -21,7 +21,7 @@ export const sendOTPVerification = async (
   },
 ) => {
   await resend.sendEmail(ctx, {
-    from: "Rlly <onboarding@resend.dev>",
+    from: "Rlly <noreply@rlly.live>",
     to,
     subject: `${code} is your Rlly Sign-in code`,
     html: await render(<VerifyOTP code={code} />),
