@@ -6,7 +6,7 @@ import { requireMutationCtx } from "@convex-dev/better-auth/utils";
 import { sendOTPVerification } from "../lib/email";
 
 export const createAuth = (ctx: any, betterAuthComponent: any) => {
-  const siteUrl = process.env.CONVEX_SITE_URL;
+  const siteUrl = process.env.CONVEX_FRONTEND_URL;
   return betterAuth({
     // All auth requests will be proxied through your next.js server
     baseURL: siteUrl,
