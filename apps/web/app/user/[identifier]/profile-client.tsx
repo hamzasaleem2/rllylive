@@ -330,7 +330,6 @@ export function ProfileClient({ identifier }: ProfileClientProps) {
             </div>
           ) : (
             <div className="text-center py-12">
-              <Calendar className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
               <p className="text-sm text-muted-foreground">No events yet</p>
             </div>
           )}
