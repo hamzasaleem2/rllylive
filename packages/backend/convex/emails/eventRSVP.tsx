@@ -33,7 +33,7 @@ export default function EventRSVP({
     <BaseEmail
       previewText={`${attendeeName} RSVPed to ${eventName}`}
       footerLinks={[
-        { text: "Help", href: "https://rlly.live/help" },
+        { text: "Help", href: "https://app.rlly.live/help" },
         { text: "Contact", href: "mailto:support@rlly.live" },
       ]}
     >      

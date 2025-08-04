@@ -34,7 +34,7 @@ export default function EventInvitation({
     <BaseEmail
       previewText={`${inviterName} invited you to ${eventName}`}
       footerLinks={[
-        { text: "Help", href: "https://rlly.live/help" },
+        { text: "Help", href: "https://app.rlly.live/help" },
         { text: "Contact", href: "mailto:support@rlly.live" },
       ]}
     >      

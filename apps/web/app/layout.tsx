@@ -12,7 +12,7 @@ import { UnifiedHeader } from "@/components/unified-header"
 export const metadata: Metadata = {
   title: {
     template: "%s | rlly.live",
-    default: "rlly.live - Create events that actually happen"
+    default: "app.rlly.live - Create events that actually happen"
   },
   description: "Create events that actually happen. Real-time RSVPs, live updates, and event management made simple.",
   keywords: ["events", "RSVP", "party planning", "event management", "social"],
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://rlly.live",
+    url: "https://app.rlly.live",
     siteName: "rlly.live",
     title: "rlly.live - Create events that actually happen",
     description: "Create events that actually happen. Real-time RSVPs, live updates, and event management made simple.",

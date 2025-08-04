@@ -21,7 +21,7 @@ interface CalendarInvitationProps {
 export default function CalendarInvitation({
   inviterName = "Someone",
   calendarName = "Sample Calendar",
-  joinUrl = "https://rlly.live/join/calendar/123",
+  joinUrl = "https://app.rlly.live/join/calendar/123",
 }: CalendarInvitationProps) {
   return (
     <BaseEmail previewText={`${inviterName} invited you to join ${calendarName}`}>

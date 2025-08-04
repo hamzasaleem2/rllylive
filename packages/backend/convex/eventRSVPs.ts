@@ -170,7 +170,7 @@ export const updateRSVP = mutation({
           userName: user.name || user.username || "You",
           eventName: event.name,
           rsvpStatus: args.status,
-          eventUrl: `https://rlly.live/events/${args.eventId}`,
+          eventUrl: `https://app.rlly.live/events/${args.eventId}`,
           eventDate: event.startTime,
           email: user.email,
         }
@@ -190,8 +190,8 @@ export const updateRSVP = mutation({
             guestEmail: user.email || "",
             eventName: event.name,
             rsvpStatus: args.status,
-            eventUrl: `https://rlly.live/events/${args.eventId}`,
-            manageEventUrl: `https://rlly.live/events/${args.eventId}/manage`,
+            eventUrl: `https://app.rlly.live/events/${args.eventId}`,
+            manageEventUrl: `https://app.rlly.live/events/${args.eventId}/manage`,
             email: hostUser.email,
           }
         })

@@ -540,7 +540,7 @@ export const addCalendarMember = mutation({
           email: sanitizedEmail,
           calendarName: calendar.name,
           inviterName: user.name || user.username || "Someone",
-          joinUrl: `https://rlly.live/join/calendar/${invitationId}`,
+          joinUrl: `https://app.rlly.live/join/calendar/${invitationId}`,
         }
       })
       

@@ -31,7 +31,7 @@ export default function EventGoesLive({
     <BaseEmail
       previewText={`${eventName} is starting now!`}
       footerLinks={[
-        { text: "Help", href: "https://rlly.live/help" },
+        { text: "Help", href: "https://app.rlly.live/help" },
         { text: "Contact", href: "mailto:support@rlly.live" },
       ]}
     >      

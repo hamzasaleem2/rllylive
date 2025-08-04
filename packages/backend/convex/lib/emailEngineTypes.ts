@@ -389,7 +389,7 @@ export const EmailEngineUtils = {
           data[variable] = 'Sample Calendar'
           break
         case 'unsubscribeUrl':
-          data[variable] = 'https://rlly.live/settings/notifications'
+          data[variable] = 'https://app.rlly.live/settings/notifications'
           break
         default:
           data[variable] = `[${variable}]`

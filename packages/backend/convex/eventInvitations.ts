@@ -80,7 +80,7 @@ export const sendInvitation = mutation({
           eventDate: event.startTime,
           eventLocation: event.location,
           message: args.message,
-          invitationUrl: `https://rlly.live/event/${args.eventId}`,
+          invitationUrl: `https://app.rlly.live/event/${args.eventId}`,
           email: invitedUser.email,
         }
       })

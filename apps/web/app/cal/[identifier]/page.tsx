@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: PublicCalendarPageProps): Pro
       title: `${displayName} | rlly.live`,
       description: `Check out this calendar on rlly.live`,
       type: 'website',
-      url: `https://rlly.live/cal/${identifier}`,
+      url: `https://app.rlly.live/cal/${identifier}`,
     },
     twitter: {
       card: 'summary',

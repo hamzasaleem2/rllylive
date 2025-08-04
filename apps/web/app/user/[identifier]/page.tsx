@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: PublicProfilePageProps): Prom
       title: `${displayName} | rlly.live`,
       description: `Check out this profile on rlly.live`,
       type: 'profile',
-      url: `https://rlly.live/user/${identifier}`,
+      url: `https://app.rlly.live/user/${identifier}`,
     },
     twitter: {
       card: 'summary',

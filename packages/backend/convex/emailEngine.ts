@@ -487,7 +487,7 @@ export const sendEventInvitation = mutation({
     userName: v.string(),
   },
   handler: async (ctx, args) => {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://rlly.live'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.rlly.live'
     
     return await ctx.db.insert("emailEvents", {
       userId: args.userId,
@@ -525,7 +525,7 @@ export const sendGuestRegistration = mutation({
     hostName: v.string(),
   },
   handler: async (ctx, args) => {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://rlly.live'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.rlly.live'
     
     return await ctx.db.insert("emailEvents", {
       userId: args.hostUserId,
@@ -560,7 +560,7 @@ export const sendEventReminder = mutation({
     hoursUntilEvent: v.number(),
   },
   handler: async (ctx, args) => {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://rlly.live'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.rlly.live'
     
     return await ctx.db.insert("emailEvents", {
       userId: args.userId,

@@ -22,7 +22,7 @@ export default function VerifyOTP({
       brandTagline={brandTagline}
       brandLogoUrl={brandLogoUrl}
       footerLinks={[
-        { text: "Help", href: "https://rlly.live/help" },
+        { text: "Help", href: "https://app.rlly.live/help" },
         { text: "Contact", href: "mailto:support@rlly.live" },
       ]}
     >      

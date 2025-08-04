@@ -36,7 +36,7 @@ export default function EventReminder({
     <BaseEmail
       previewText={`Reminder: ${eventName} ${reminderText}`}
       footerLinks={[
-        { text: "Help", href: "https://rlly.live/help" },
+        { text: "Help", href: "https://app.rlly.live/help" },
         { text: "Contact", href: "mailto:support@rlly.live" },
       ]}
     >      

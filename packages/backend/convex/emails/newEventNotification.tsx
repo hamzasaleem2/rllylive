@@ -32,7 +32,7 @@ export default function NewEventNotification({
     <BaseEmail
       previewText={`New event in ${calendarName}: ${eventName}`}
       footerLinks={[
-        { text: "Help", href: "https://rlly.live/help" },
+        { text: "Help", href: "https://app.rlly.live/help" },
         { text: "Contact", href: "mailto:support@rlly.live" },
       ]}
     >      

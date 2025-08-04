@@ -167,7 +167,7 @@ export const createEvent = mutation({
                 eventName: sanitizedName,
                 eventDate: args.startTime,
                 calendarName: calendarForNotifications.name,
-                eventUrl: `https://rlly.live/event/${eventId}`,
+                eventUrl: `https://app.rlly.live/event/${eventId}`,
                 email: subscriber.email,
               }
             })
@@ -190,8 +190,8 @@ export const createEvent = mutation({
           creatorName: user.name || user.username || "You",
           eventName: sanitizedName,
           eventDate: args.startTime,
-          eventUrl: `https://rlly.live/events/${eventId}`,
-          manageEventUrl: `https://rlly.live/events/${eventId}/manage`,
+          eventUrl: `https://app.rlly.live/events/${eventId}`,
+          manageEventUrl: `https://app.rlly.live/events/${eventId}/manage`,
           calendarName: calendarForNotifications?.name || "Unknown Calendar",
           email: user.email,
         }

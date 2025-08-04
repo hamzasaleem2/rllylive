@@ -64,7 +64,7 @@ export const sendEventGoesLiveNotifications = action({
             eventName: event.name,
             eventDate: event.startTime,
             eventLocation: event.location,
-            eventUrl: `https://rlly.live/event/${args.eventId}`,
+            eventUrl: `https://app.rlly.live/event/${args.eventId}`,
             isVirtual: event.isVirtual,
             virtualLink: event.virtualLink,
             email: user.email,
