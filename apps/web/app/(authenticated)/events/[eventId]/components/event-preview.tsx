@@ -256,6 +256,12 @@ export function EventPreview({ event }: EventPreviewProps) {
     return html.replace(/<[^>]*>/g, '').replace(/&[^;]+;/g, ' ')
   }
 
+  const decodeHtml = (html: string) => {
+    const textarea = document.createElement('textarea')
+    textarea.innerHTML = html
+    return textarea.value
+  }
+
   const hasDescription = event.description && stripHtml(event.description).trim() !== ''
 
   return (
@@ -908,7 +914,7 @@ export function EventPreview({ event }: EventPreviewProps) {
               <div className="text-sm text-muted-foreground mb-4">About Event</div>
               <div 
                 className="description-preview prose prose-sm max-w-none"
-                dangerouslySetInnerHTML={{ __html: event.description }}
+                dangerouslySetInnerHTML={{ __html: decodeHtml(event.description) }}
               />
             </div>
           )}
