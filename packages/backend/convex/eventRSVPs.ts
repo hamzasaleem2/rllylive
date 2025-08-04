@@ -161,19 +161,37 @@ export const updateRSVP = mutation({
       }
     }
 
-    // Notify event host about RSVP (if not the host RSVPing)
+    // Send RSVP confirmation to user (including if they're the host)
+    if (user.email) {
+      await ctx.runMutation(api.emailEngine.triggerEmailEvent, {
+        eventType: "rsvp_confirmation",
+        userId: user.userId,
+        data: {
+          userName: user.name || user.username || "You",
+          eventName: event.name,
+          rsvpStatus: args.status,
+          eventUrl: `https://rlly.live/events/${args.eventId}`,
+          eventDate: event.startTime,
+          email: user.email,
+        }
+      })
+    }
+
+    // Also notify event host about RSVP (if someone else is RSVPing)
     if (event.createdById !== user.userId) {
       const hostUser = await ctx.db.get(event.createdById)
       if (hostUser?.email) {
         await ctx.runMutation(api.emailEngine.triggerEmailEvent, {
-          eventType: "event_rsvp",
+          eventType: "guest_registration",
           userId: event.createdById,
           data: {
             hostName: hostUser.name || hostUser.username || "Host",
-            attendeeName: user.name || user.username || "Someone",
+            guestName: user.name || user.username || "Someone",
+            guestEmail: user.email || "",
             eventName: event.name,
             rsvpStatus: args.status,
-            eventUrl: `https://rlly.live/event/${args.eventId}`,
+            eventUrl: `https://rlly.live/events/${args.eventId}`,
+            manageEventUrl: `https://rlly.live/events/${args.eventId}/manage`,
             email: hostUser.email,
           }
         })

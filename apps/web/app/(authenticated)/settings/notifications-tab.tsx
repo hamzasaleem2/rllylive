@@ -19,6 +19,7 @@ const NOTIFICATION_SECTIONS = [
       { key: "event_reminders", label: "Event Reminders" },
       { key: "event_blasts", label: "Event Blasts" },
       { key: "event_updates", label: "Event Updates" },
+      { key: "event_confirmations", label: "Event Confirmations" },
       { key: "feedback_requests", label: "Feedback Requests" },
     ],
   },

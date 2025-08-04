@@ -181,6 +181,23 @@ export const createEvent = mutation({
       eventId: eventId
     })
 
+    // Send event creation confirmation to creator
+    if (user.email) {
+      await ctx.runMutation(api.emailEngine.triggerEmailEvent, {
+        eventType: "event_creation_confirmation",
+        userId: user.userId,
+        data: {
+          creatorName: user.name || user.username || "You",
+          eventName: sanitizedName,
+          eventDate: args.startTime,
+          eventUrl: `https://rlly.live/events/${eventId}`,
+          manageEventUrl: `https://rlly.live/events/${eventId}/manage`,
+          calendarName: calendarForNotifications?.name || "Unknown Calendar",
+          email: user.email,
+        }
+      })
+    }
+
     return { eventId }
   },
 })

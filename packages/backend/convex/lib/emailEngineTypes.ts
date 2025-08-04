@@ -29,6 +29,8 @@ export type EventType =
   | "new_member"
   | "event_submission"
   | "product_update"
+  | "rsvp_confirmation"
+  | "event_creation_confirmation"
 
 export interface EventData {
   // User events
@@ -150,6 +152,26 @@ export interface EventData {
     featureHighlights: string[]
     learnMoreUrl: string
     unsubscribeUrl: string
+  }
+  
+  // Confirmation emails
+  rsvp_confirmation: {
+    email: string
+    userName: string
+    eventName: string
+    rsvpStatus: "going" | "maybe" | "not_going"
+    eventUrl: string
+    eventDate: number
+  }
+  
+  event_creation_confirmation: {
+    email: string
+    creatorName: string
+    eventName: string
+    eventDate: number
+    eventUrl: string
+    manageEventUrl: string
+    calendarName: string
   }
 }
 
@@ -384,7 +406,9 @@ export const EmailEngineUtils = {
       'feedback_response': 'feedback_responses',
       'new_member': 'new_members',
       'event_submission': 'event_submissions',
-      'product_update': 'product_updates'
+      'product_update': 'product_updates',
+      'rsvp_confirmation': 'event_confirmations',
+      'event_creation_confirmation': 'event_confirmations'
     }
     return mapping[eventType] || 'product_updates'
   },
