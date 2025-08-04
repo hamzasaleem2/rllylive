@@ -13,7 +13,7 @@ export function Footer() {
           <div className="flex items-center space-x-6 text-xs">
             <a href="#" className="text-muted-foreground hover:text-foreground transition-colors font-medium">Privacy</a>
             <a href="#" className="text-muted-foreground hover:text-foreground transition-colors font-medium">Terms</a>
-            <a href="#" className="text-muted-foreground hover:text-foreground transition-colors font-medium">Support</a>
+            <a href="mailto:hamzasaleembusiness@gmail.com" className="text-muted-foreground hover:text-foreground transition-colors font-medium">Support</a>
             <span className="text-muted-foreground/50 font-mono">© 2025</span>
           </div>
         </div>

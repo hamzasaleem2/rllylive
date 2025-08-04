@@ -41,7 +41,7 @@ export function Header() {
             </div>
             <ThemeToggle />
             <Button variant="dark" size="sm" className="font-medium">
-              Sign In
+              <a href="https://app.rlly.live" target="_blank" rel="noopener noreferrer">Sign In</a>
             </Button>
           </div>
         </div>
