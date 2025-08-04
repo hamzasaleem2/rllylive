@@ -248,6 +248,7 @@ export const checkUserWantsNotification = internalQuery({
 // MUTATIONS
 // ===================
 
+
 export const markEventProcessed = internalMutation({
   args: { eventId: v.id("emailEvents") },
   handler: async (ctx, args) => {
@@ -369,6 +370,14 @@ export const setupEmailTemplatesAndRules = mutation({
         category: "calendar_manager",
       },
       {
+        id: "calendar_invitation",
+        name: "Calendar Invitation",
+        subject: "You're invited to join a calendar!",
+        componentPath: "./emails/calendarInvitation",
+        variables: ["inviterName", "calendarName", "joinUrl", "email"],
+        category: "calendar",
+      },
+      {
         id: "event_goes_live",
         name: "Event Goes Live",
         subject: "Your event is starting now!",
@@ -403,6 +412,13 @@ export const setupEmailTemplatesAndRules = mutation({
       {
         trigger: "new_event_notification",
         template: "new_event_notification", 
+        delayMinutes: 0, // Send immediately
+        active: true,
+        priority: 1
+      },
+      {
+        trigger: "calendar_invitation",
+        template: "calendar_invitation",
         delayMinutes: 0, // Send immediately
         active: true,
         priority: 1

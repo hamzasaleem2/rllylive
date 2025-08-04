@@ -2,6 +2,7 @@ import { v } from "convex/values"
 import { mutation, query } from "./_generated/server"
 import { betterAuthComponent } from "./auth"
 import { enforceRateLimit } from "./rateLimit"
+import { api } from "./_generated/api"
 
 // Input sanitization helpers
 function sanitizeText(text: string): string {
@@ -531,17 +532,17 @@ export const addCalendarMember = mutation({
         invitedAt: Date.now(),
       })
       
-      // TODO: Send invitation email here
-      // await ctx.runMutation(api.emailEngine.triggerEmailEvent, {
-      //   eventType: "calendar_invitation",
-      //   userId: user.userId, // Inviter
-      //   data: {
-      //     email: sanitizedEmail,
-      //     calendarName: calendar.name,
-      //     inviterName: user.name || user.username || "Someone",
-      //     joinUrl: `https://rlly.live/join/calendar/${invitationId}`,
-      //   }
-      // })
+      // Send invitation email (using inviter's userId for notification preferences)
+      await ctx.runMutation(api.emailEngine.triggerEmailEvent, {
+        eventType: "calendar_invitation",
+        userId: user.userId, // Use inviter's ID for notification preferences
+        data: {
+          email: sanitizedEmail,
+          calendarName: calendar.name,
+          inviterName: user.name || user.username || "Someone",
+          joinUrl: `https://rlly.live/join/calendar/${invitationId}`,
+        }
+      })
       
       return { success: true, type: "invitation_sent", invitationId }
     }

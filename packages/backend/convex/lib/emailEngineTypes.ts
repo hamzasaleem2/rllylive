@@ -31,6 +31,7 @@ export type EventType =
   | "product_update"
   | "rsvp_confirmation"
   | "event_creation_confirmation"
+  | "calendar_invitation"
 
 export interface EventData {
   // User events
@@ -172,6 +173,13 @@ export interface EventData {
     eventUrl: string
     manageEventUrl: string
     calendarName: string
+  }
+  
+  calendar_invitation: {
+    email: string
+    inviterName: string
+    calendarName: string
+    joinUrl: string
   }
 }
 
@@ -408,7 +416,8 @@ export const EmailEngineUtils = {
       'event_submission': 'event_submissions',
       'product_update': 'product_updates',
       'rsvp_confirmation': 'event_confirmations',
-      'event_creation_confirmation': 'event_confirmations'
+      'event_creation_confirmation': 'event_confirmations',
+      'calendar_invitation': 'calendar_invitations'
     }
     return mapping[eventType] || 'product_updates'
   },
