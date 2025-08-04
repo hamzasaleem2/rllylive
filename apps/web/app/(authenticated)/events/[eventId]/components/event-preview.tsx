@@ -697,31 +697,42 @@ export function EventPreview({ event }: EventPreviewProps) {
             {userRSVP?.status === "going" ? (
               /* Already Registered - Show "You're In" state */
               <>
-                {/* Top Section - Avatar and Live Badge */}
-                <div className="flex items-start justify-between">
+                {/* Top Section - User Info and Status Badges */}
+                <div className="space-y-3">
+                  {/* User info row */}
                   <div className="flex items-center gap-3">
                     {currentUser && (
-                      <div className="relative">
-                        <Avatar className="w-10 h-10">
-                          <AvatarImage src={currentUser.image} />
-                          <AvatarFallback />
-                        </Avatar>
-                        {isLive && (
-                          <div className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-orange-500 rounded-full animate-pulse" />
-                        )}
+                      <>
+                        <div className="relative">
+                          <Avatar className="w-10 h-10">
+                            <AvatarImage src={currentUser.image} />
+                            <AvatarFallback />
+                          </Avatar>
+                          {isLive && (
+                            <div className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-orange-500 rounded-full animate-pulse" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium">{currentUser.name || currentUser.username || 'User'}</div>
+                          <div className="text-sm text-muted-foreground">{currentUser.email}</div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  
+                  {/* Status badges row */}
+                  <div className="flex items-center gap-2">
+                    {isLive && (
+                      <div className="bg-orange-500 text-white px-2 py-0.5 rounded text-xs font-medium">
+                        LIVE
+                      </div>
+                    )}
+                    {isFuture && timeUntilStart && (
+                      <div className="bg-blue-500 text-white px-2 py-0.5 rounded text-xs font-medium">
+                        {timeUntilStart}
                       </div>
                     )}
                   </div>
-                  {isLive && (
-                    <div className="bg-orange-500 text-white px-2 py-0.5 rounded text-xs font-medium">
-                      LIVE
-                    </div>
-                  )}
-                  {isFuture && timeUntilStart && (
-                    <div className="bg-blue-500 text-white px-2 py-0.5 rounded text-xs font-medium">
-                      {timeUntilStart}
-                    </div>
-                  )}
                 </div>
 
                 {/* Status */}
