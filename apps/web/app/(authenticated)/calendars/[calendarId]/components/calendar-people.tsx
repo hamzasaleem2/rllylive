@@ -128,7 +128,13 @@ export function CalendarPeople({ calendarId }: CalendarPeopleProps) {
         email: newMemberEmail.trim() 
       })
       
-      toast.success(result.message || "Member added successfully!")
+      if (result.type === "existing_user") {
+        toast.success("Member added successfully!")
+      } else if (result.type === "invitation_sent") {
+        toast.success("Invitation sent! They'll be added when they create an account.")
+      } else {
+        toast.success("Member added successfully!")
+      }
       setNewMemberEmail("")
       setAddMemberOpen(false)
     } catch (error: any) {
