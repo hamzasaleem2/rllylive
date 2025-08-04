@@ -34,7 +34,7 @@ export function EventManagementClient({ event }: EventManagementClientProps) {
 
   return (
     <PageLayout title={event.name} rightElement={viewEventButton}>
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabType)} className="w-full">
         <TabsList className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground mb-6">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="guests">Guests</TabsTrigger>
