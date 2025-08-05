@@ -149,7 +149,7 @@ export function SignInForm() {
           },
           onSuccess: () => {
             setIsLoading(false)
-            router.push("/")
+            window.location.href = "/"
           },
           onError: (ctx) => {
             setIsLoading(false)
@@ -229,7 +229,7 @@ export function SignInForm() {
       }, {
         onSuccess: () => {
           setGoogleLoading(false)
-          router.push("/")
+          window.location.href = "/"
         },
         onError: (ctx) => {
           setGoogleLoading(false)
