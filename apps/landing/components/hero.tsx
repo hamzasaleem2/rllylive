@@ -66,6 +66,17 @@ export function Hero() {
                   <div className="absolute top-0 left-0 w-20 h-full bg-gradient-to-r from-transparent via-white/6 to-transparent blur-sm transform -translate-x-20 group-hover:translate-x-[calc(100%-1rem)] transition-transform duration-500 ease-out"></div>
                 </div>
               </a>
+              <div className="mt-2">
+                <a
+                  href="https://x.com/_hamza_saleem/status/1953764944463143375"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-xs sm:text-sm text-muted-foreground/80 hover:text-foreground transition-colors bg-muted/20 hover:bg-muted/40 rounded-full px-3 py-1.5 border border-border/30 hover:border-border/60"
+                >
+                  <span className="font-medium">Placed 3rd at the Convex + Resend Hackathon</span>
+                  <span aria-hidden>🏆</span>
+                </a>
+              </div>
             </div>
             
             <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-light tracking-tight text-foreground mb-6 lg:mb-8 leading-[0.95]">
