@@ -17,6 +17,7 @@ export function SignInForm() {
   const [canResend, setCanResend] = useState(false)
   const [resendTimer, setResendTimer] = useState(60)
   const [googleLoading, setGoogleLoading] = useState(false)
+  const [lastAuthMethod, setLastAuthMethod] = useState<"email" | "google" | null>(null)
   const otpRefs = useRef<(HTMLInputElement | null)[]>([])
 
   useEffect(() => {
@@ -39,6 +40,17 @@ export function SignInForm() {
   useEffect(() => {
     if (error) setError("")
   }, [email])
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem("rlly:lastAuthMethod")
+      if (stored === "email" || stored === "google") {
+        setLastAuthMethod(stored)
+      }
+    } catch (_) {
+      // ignore storage errors
+    }
+  }, [])
 
   const handleOtpChange = (index: number, value: string) => {
     if (value.length > 1) {
@@ -148,6 +160,7 @@ export function SignInForm() {
             setIsLoading(true)
           },
           onSuccess: () => {
+            try { window.localStorage.setItem("rlly:lastAuthMethod", "email") } catch (_) {}
             setIsLoading(false)
             window.location.href = "/"
           },
@@ -228,6 +241,7 @@ export function SignInForm() {
         provider: "google"
       }, {
         onSuccess: () => {
+          try { window.localStorage.setItem("rlly:lastAuthMethod", "google") } catch (_) {}
           setGoogleLoading(false)
           window.location.href = "/"
         },
@@ -244,6 +258,15 @@ export function SignInForm() {
 
   return (
     <main className="min-h-screen flex flex-col bg-gradient-to-br from-background via-muted/20 to-background">
+      <style jsx>{`
+        @keyframes lastused-fade-in {
+          from { opacity: 0; transform: translate(4px, -4px) scale(0.98); }
+          to { opacity: 1; transform: translate(0, 0) scale(1); }
+        }
+        .badge-animate {
+          animation: lastused-fade-in 220ms ease-out both;
+        }
+      `}</style>
       
       <div className="flex-1 flex items-start justify-center px-6 pt-16 pb-12">
         <div className="w-full max-w-sm space-y-8 bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-8 shadow-lg">
@@ -296,17 +319,20 @@ export function SignInForm() {
 
               <Button 
                 type="submit"
-                className="w-full" 
+                className="w-full relative" 
                 size="default"
                 disabled={isLoading || !email}
               >
-{isLoading ? (
+                {isLoading ? (
                   <>
                     <Spinner size="sm" variant="light" />
                     Sending...
                   </>
                 ) : (
                   "Continue with Email"
+                )}
+                {lastAuthMethod === "email" && (
+                  <span className="pointer-events-none absolute -top-2 -right-2 rounded-full bg-live-green/20 dark:bg-live-green px-2.5 py-[3px] text-xs font-medium text-black shadow-sm badge-animate">Last used</span>
                 )}
               </Button>
             </form>
@@ -357,7 +383,7 @@ export function SignInForm() {
                 size="default"
                 disabled={isLoading || otp.join("").length !== 6}
               >
-{isLoading ? (
+                {isLoading ? (
                   <>
                     <Spinner size="sm" variant="light" />
                     Verifying...
@@ -407,7 +433,7 @@ export function SignInForm() {
 
           <Button 
             variant="outline" 
-            className="w-full" 
+            className="w-full relative" 
             onClick={handleGoogleSignIn}
             disabled={googleLoading || isLoading}
           >
@@ -426,6 +452,9 @@ export function SignInForm() {
                 </svg>
                 Sign in with Google
               </>
+            )}
+            {lastAuthMethod === "google" && (
+              <span className="pointer-events-none absolute -top-2 -right-2 rounded-full bg-live-green/20 dark:bg-live-green px-2.5 py-[3px] text-[10px] font-medium text-black shadow-sm badge-animate">Last used</span>
             )}
           </Button>
         </div>
