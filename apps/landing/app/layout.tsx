@@ -6,6 +6,7 @@ import {
   Instrument_Sans,
   Bricolage_Grotesque,
 } from "next/font/google"
+import { Analytics } from "@vercel/analytics/react"
 
 // Monospace for logo and accents
 const jetbrainsMono = JetBrains_Mono({
@@ -61,6 +62,7 @@ export default function RootLayout({
       <body className={`${instrumentSans.variable} ${jetbrainsMono.variable} ${bricolageGrotesque.variable} font-sans antialiased`}>
         <ThemeProvider>
           {children}
+          <Analytics />
         </ThemeProvider>
       </body>
     </html>

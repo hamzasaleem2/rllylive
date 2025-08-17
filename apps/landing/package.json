@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@vercel/analytics": "^1.5.0",
     "@workspace/ui": "workspace:*",
     "framer-motion": "^12.0.0",
     "lucide-react": "^0.475.0",
